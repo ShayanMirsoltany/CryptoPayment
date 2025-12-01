@@ -2,7 +2,7 @@
 pragma solidity ^0.8.30;
 import "forge-std/Script.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-import "../src/core/ERC20/CLT_Token.sol";
+import "@core/ERC20/CLT_Token.sol";
 
 contract DeployTokenV1 is Script {
     function run() public {

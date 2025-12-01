@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import "@chainlink/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
-contract KeeperManager is AutomationCompatibleInterface {
+contract CheckOrdersInWait is AutomationCompatibleInterface {
     event CheckEvent(address indexed user, uint256 timestamp);
     event RewardGranted(address indexed user, uint256 tokenId, uint256 timestamp);
 

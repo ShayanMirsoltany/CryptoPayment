@@ -2,7 +2,7 @@
 pragma solidity ^0.8.30;
 import "forge-std/Script.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-import "@core/CCIP/PaymentGatewayPOL.sol";
+import "@core/Gateways/PaymentGatewayPOL.sol";
 
 contract DeployPaymentGatewayPOL is Script {
     function run() public {
