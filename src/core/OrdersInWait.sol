@@ -36,7 +36,8 @@ contract OrdersInWait is IOrdersInWait, CCIPReceiverUpgradeable, UUPSUpgradeable
         order.success = true;
         order.modfiedDateTime = block.timestamp;
         _ordersInfo[order.orderId] = order;
-        return order.success;
+        result = true;
+        emit ModifyOrderStatus_Event(order.orderId, order.modfiedDateTime);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}

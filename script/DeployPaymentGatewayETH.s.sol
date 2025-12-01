@@ -30,5 +30,4 @@ contract DeployPaymentGatewayETH is Script {
 // forge script script/DeployPaymentGatewayETH.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
 // forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x65a19a558823CC44e152Ea2b23B12C78B4706BA2  0x8129fc1c)  0x937f04035A485f01a4D9aFE52A603bf6594D97d5  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 //Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0x937f04035A485f01a4D9aFE52A603bf6594D97d5  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast send 0x937f04035A485f01a4D9aFE52A603bf6594D97d5 "addToPaymentQueue(uint256 , address)" 123456 0xfD7E5B87504f5a7ec69B8045F25b3129F2e555F5 --value 1 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast call 0x937f04035A485f01a4D9aFE52A603bf6594D97d5 "getOrderInfo(uint256)" 123456 --rpc-url $env:RPC_SEPOLIA
+//cast send 0x937f04035A485f01a4D9aFE52A603bf6594D97d5 "addToPaymentQueue(uint256 , address)" 555000 0x795117285A083Bcde1DF36233062B0f0c093BDa3 --value 1 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
