@@ -13,7 +13,7 @@ contract PaymentGatewayPOL is UUPSUpgradeable, OwnableUpgradeable, AccessControl
     mapping(uint256 orderId => bytes32 messageId) private _ordersMessage;
     IRouterClient private router;
     address private linkToken;
-    function initialize(address _router, address _linkToken) public {
+    function initialize(address _router, address _linkToken) public initializer {
         __Ownable_init();
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);

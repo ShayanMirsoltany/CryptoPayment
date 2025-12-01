@@ -7,6 +7,7 @@ remappings=[
     "@utils/=src/utils",
     "@share/=src/share",
     "@core/=src/core",
+    "@interfaces/=src/interfaces",
     "forge-std/=lib/forge-std/src",
     "@chainlink/=lib/chainlink-brownie-contracts/contracts/",
     "@ccip-contracts/=lib/ccip-contracts/contracts/",

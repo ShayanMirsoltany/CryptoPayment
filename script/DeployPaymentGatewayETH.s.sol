@@ -25,11 +25,10 @@ contract DeployPaymentGatewayETH is Script {
 //     }
 // }
 
-// contract token : 0xdc838496e8139ACa84BA039CDb5C3230411C5dB7
-// proxy address : 0x6411cB2c1fCAC3d1Dc44BC2b23A06Fe8b86e9ad4
-
-// forge script script/Deploy_Token.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
-//Link Polygon // cast send 0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904 "transfer(address,uint256)" 0x6d20C71725068860fD0536E3e6101b6e4C4a5598 1000000000000000000 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
-//Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0x9B2e17BFaa54E03a20e97b65E2f18810dc7E0826  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast send 0xa3258a331913B3097a13F913804CEca5242DC56E "func(address)" 0x38c30a38cbd6fd5333eb70eda32078e51e7e3009 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast call 0xa3258a331913B3097a13F913804CEca5242DC56E "balanceOf(address)" 0x38c30a38cbd6fd5333eb70eda32078e51e7e3009 --rpc-url $env:RPC_SEPOLIA
+// contract token : 0x65a19a558823CC44e152Ea2b23B12C78B4706BA2
+// proxy address : 0x937f04035A485f01a4D9aFE52A603bf6594D97d5
+// forge script script/DeployPaymentGatewayETH.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
+// forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x65a19a558823CC44e152Ea2b23B12C78B4706BA2  0x8129fc1c)  0x937f04035A485f01a4D9aFE52A603bf6594D97d5  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
+//Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0x937f04035A485f01a4D9aFE52A603bf6594D97d5  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast send 0x937f04035A485f01a4D9aFE52A603bf6594D97d5 "addToPaymentQueue(uint256 , address)" 123456 0xfD7E5B87504f5a7ec69B8045F25b3129F2e555F5 --value 1 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast call 0x937f04035A485f01a4D9aFE52A603bf6594D97d5 "getOrderInfo(uint256)" 123456 --rpc-url $env:RPC_SEPOLIA

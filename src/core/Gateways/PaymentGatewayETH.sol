@@ -7,6 +7,7 @@ import "@utils/Roles.sol";
 import "@utils/Errors.sol";
 import "@utils/Events/PaymentETH_Events.sol";
 import "@utils/Structs.sol";
+import "@interfaces/IOrdersInWait.sol";
 
 contract PaymentGatewayETH is UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
     mapping(address userWalletId => uint256 amount) private _balances;
@@ -24,7 +25,14 @@ contract PaymentGatewayETH is UUPSUpgradeable, OwnableUpgradeable, AccessControl
         _orders[msg.sender].push(orderId);
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
         OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0);
-        OrdersInWait(contractReceiver).addToOrdersInWaiting(order);
+
+        try IOrdersInWait(contractReceiver).modifyOrderStatus(order) returns (bool ok) {
+            if (!ok) {
+                IOrdersInWait(contractReceiver).addToOrdersInWaiting(order);
+            }
+        } catch {
+            IOrdersInWait(contractReceiver).addToOrdersInWaiting(order);
+        }
         emit SendMessage_Events(order.orderId);
         result = true;
     }
