@@ -50,7 +50,7 @@ contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
             data: abi.encode(order),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             //  tokenAmounts: new Client.EVMTokenAmountClient.EVMTokenAmount({ token: WETH_SEPOLIA, amount: 0.1 ether }),
-            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({ gasLimit: 50_000 })),
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({ gasLimit: 200_000 })),
             feeToken: linkToken
         });
         uint256 fee = router.getFee(destinationChainSelector, message);

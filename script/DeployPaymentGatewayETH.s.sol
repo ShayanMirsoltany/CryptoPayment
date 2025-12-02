@@ -18,16 +18,17 @@ contract DeployPaymentGatewayETH is Script {
 // contract DeployTokenV2 is Script {
 //     function run() public {
 //         vm.startBroadcast();
-//         address proxyAddr = 0x6411cB2c1fCAC3d1Dc44BC2b23A06Fe8b86e9ad4;
+//         address proxyAddr = 0x31D653D6bdFCEF65420ebC5906e9BDA87968C07e;
 //         CLT_Token2 v2 = new CLT_Token2();
 //         CLT_Token(proxyAddr).upgradeTo(address(v2));
 //         vm.stopBroadcast();
 //     }
 // }
 
-// contract token : 0x65a19a558823CC44e152Ea2b23B12C78B4706BA2
-// proxy address : 0x937f04035A485f01a4D9aFE52A603bf6594D97d5
+// contract token : 0x86234BCC4F32249254c52aA9BdE453e34d5741b8
+// proxy address : 0x31D653D6bdFCEF65420ebC5906e9BDA87968C07e
 // forge script script/DeployPaymentGatewayETH.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
-// forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x65a19a558823CC44e152Ea2b23B12C78B4706BA2  0x8129fc1c)  0x937f04035A485f01a4D9aFE52A603bf6594D97d5  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
-//Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0x937f04035A485f01a4D9aFE52A603bf6594D97d5  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast send 0x937f04035A485f01a4D9aFE52A603bf6594D97d5 "addToPaymentQueue(uint256 , address)" 555000 0x795117285A083Bcde1DF36233062B0f0c093BDa3 --value 1 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+// forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x86234BCC4F32249254c52aA9BdE453e34d5741b8  0x8129fc1c)  0x937f04035A485f01a4D9aFE52A603bf6594D97d5  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
+//Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0x31D653D6bdFCEF65420ebC5906e9BDA87968C07e  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast send 0x31D653D6bdFCEF65420ebC5906e9BDA87968C07e "modifyContractReceiver(address)" 0x0CE2A7df7FBcA936019D2f0583c246565B76eb19 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast send 0x31D653D6bdFCEF65420ebC5906e9BDA87968C07e "addToPaymentQueue(uint256)" 666555 --value 1 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY

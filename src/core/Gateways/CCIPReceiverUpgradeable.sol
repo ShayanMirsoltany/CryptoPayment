@@ -8,5 +8,10 @@ contract CCIPReceiverUpgradeable is Initializable {
     function __CCIPReceiver_init(address _router) internal initializer {
         router = IRouterClient(_router);
     }
-    function _ccipReceive(Client.Any2EVMMessage memory message) internal virtual {}
+    function ccipReceive(Client.Any2EVMMessage calldata message) external {
+        require(msg.sender == address(router), "NOT_ROUTER");
+        _ccipReceive(message);
+    }
+
+    function _ccipReceive(Client.Any2EVMMessage memory message) public virtual {}
 }

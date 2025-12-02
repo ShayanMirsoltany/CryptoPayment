@@ -11,10 +11,11 @@ contract DeployOrdersInWait is Script {
         address _router = 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59;
         // address _linkToken = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
         // uint256 _chainSelector = 16015286601757825753;
-        OrdersInWait impl = new OrdersInWait();
-        bytes memory data = abi.encodeCall(OrdersInWait.initialize, (_router));
-        address proxy = address(new ERC1967Proxy(address(impl), data));
-        console.log("OrdersInWait proxy : ", proxy);
+        OrdersInWait impl = new OrdersInWait(_router);
+        // bytes memory data = abi.encodeCall(OrdersInWait.initialize, (_router));
+        // address proxy = address(new ERC1967Proxy(address(impl), data));
+        // console.log("OrdersInWait proxy : ", proxy);
+        console.log("OrdersInWait address : ", address(impl));
         vm.stopBroadcast();
     }
 }
@@ -29,11 +30,11 @@ contract DeployOrdersInWait is Script {
 //     }
 // }
 
-// contract token : 0x2caFf340e1e82c61481dFC2A9Fd689bDe9583a3d
-// proxy address : 0x795117285A083Bcde1DF36233062B0f0c093BDa3
+// contract token : 0x2b95378231D4d00533A8200B62a2aF52B0ad08D0
+// proxy address : 0xDAD57b2C9E3578DB0d6442E2bc696671107788dE
 
 // forge script script/DeployOrdersInWait.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
-// forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x57D457A897F622e68E84EE14ee9ce925dB84cc34  0x8129fc1c)  0x795117285A083Bcde1DF36233062B0f0c093BDa3  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
+// forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x2b95378231D4d00533A8200B62a2aF52B0ad08D0  0x8129fc1c)  0xBEA8A75F356efdcbF14C70c09c5FdFDE7b827715  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
-//cast send 0x795117285A083Bcde1DF36233062B0f0c093BDa3 "func(address)" 0x38c30a38cbd6fd5333eb70eda32078e51e7e3009 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast call 0x795117285A083Bcde1DF36233062B0f0c093BDa3 "getOrderInfo(uint256)" 555000 --rpc-url $env:RPC_SEPOLIA
+//cast send 0xDAD57b2C9E3578DB0d6442E2bc696671107788dE "setModifierOrderStatusRole(address)" 0x2ebdE73f456a3bE7fCC9C29F00d679f7600B365F --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast call 0xDAD57b2C9E3578DB0d6442E2bc696671107788dE "getOrderInfo(uint256)" 666555 --rpc-url $env:RPC_SEPOLIA

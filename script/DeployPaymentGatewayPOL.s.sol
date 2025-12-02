@@ -28,12 +28,13 @@ contract DeployPaymentGatewayPOL is Script {
 //     }
 // }
 
-// contract token : 0xf10bDdeDaa761fa5c4c3b64eC832716Fcc157CE8
-// proxy address : 0xD78280f74a1dd80f9e0faaFfd1119D9aBa18DEf4
+// contract token : 0x38B385c043B852ed0DA5A00f4B7A4dA64a4687E6
+// proxy address : 0x78cF4b67367829C41939Dd199f399107C7dd2428
 
 // forge script script/DeployPaymentGatewayPOL.s.sol --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY --broadcast --verify
-// forge verify-contract --chain polygon-amoy  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0xf10bDdeDaa761fa5c4c3b64eC832716Fcc157CE8  0x8129fc1c)  0xD78280f74a1dd80f9e0faaFfd1119D9aBa18DEf4  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
+// forge verify-contract --chain polygon-amoy  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x38B385c043B852ed0DA5A00f4B7A4dA64a4687E6  0x8129fc1c)  0xD78280f74a1dd80f9e0faaFfd1119D9aBa18DEf4  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
-//Link Polygon // cast send 0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904 "transfer(address,uint256)" 0xD78280f74a1dd80f9e0faaFfd1119D9aBa18DEf4 1000000000000000000 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
-//cast send 0xa3258a331913B3097a13F913804CEca5242DC56E "func(address)" 0x38c30a38cbd6fd5333eb70eda32078e51e7e3009 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast call 0xa3258a331913B3097a13F913804CEca5242DC56E "balanceOf(address)" 0x38c30a38cbd6fd5333eb70eda32078e51e7e3009 --rpc-url $env:RPC_SEPOLIA
+//Link Polygon // cast send 0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904 "transfer(address,uint256)" 0x78cF4b67367829C41939Dd199f399107C7dd2428 2000000000000000000 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
+//cast send 0x78cF4b67367829C41939Dd199f399107C7dd2428 "modifyContractReceiver(address)" 0xDAD57b2C9E3578DB0d6442E2bc696671107788dE --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
+//cast send 0x78cF4b67367829C41939Dd199f399107C7dd2428 "modifyDestinationChainSelector(uint64)" 16015286601757825753 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
+//cast send 0x78cF4b67367829C41939Dd199f399107C7dd2428 "addToPaymentQueue(uint256)" 666444 --value 1 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
