@@ -35,6 +35,6 @@ contract DeployPaymentGatewayPOL is Script {
 // forge verify-contract --chain polygon-amoy  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x6D2743d55AFdfACB7E41b5D530Df81258D0d98c4  0x8129fc1c)  0x8E060eE79F90e5112422E017deae9d30E257dB9d  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
 //Link Polygon // cast send 0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904 "transfer(address,uint256)" 0x8E060eE79F90e5112422E017deae9d30E257dB9d 2000000000000000000 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
-//cast send 0x8E060eE79F90e5112422E017deae9d30E257dB9d "modifyContractReceiver(address)" 0x8E060eE79F90e5112422E017deae9d30E257dB9d --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
+//cast send 0x8E060eE79F90e5112422E017deae9d30E257dB9d "modifyContractReceiver(address)" 0x246e1679Bbc4BBfEe8914F69b78218F821481A86 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
 //cast send 0x8E060eE79F90e5112422E017deae9d30E257dB9d "modifyDestinationChainSelector(uint64)" 16015286601757825753 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY
 //cast send 0x8E060eE79F90e5112422E017deae9d30E257dB9d "addToPaymentQueue(uint256)" 666999 --value 1 --rpc-url $env:RPC_POLYGON --private-key $env:PRIVATE_KEY

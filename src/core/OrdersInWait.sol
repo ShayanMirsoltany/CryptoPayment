@@ -29,7 +29,7 @@ contract OrdersInWait is IOrdersInWait, CCIPReceiver, Ownable, AccessControl {
 
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
         (uint256 orderId, uint256 createdDateTime, address userId, uint256 price) = abi.decode(message.data, (uint256, uint256, address, uint256));
-        _ordersInfo[orderId] = OrdersStruct(orderId, userId, price, true, createdDateTime, block.timestamp);
+        // _ordersInfo[orderId] = OrdersStruct(orderId, userId, price, true, createdDateTime, block.timestamp);
         emit OrderReceived_Event(message.messageId, orderId, userId);
     }
 
