@@ -8,36 +8,50 @@ import "@utils/Errors.sol";
 import "@utils/Events/PaymentETH_Events.sol";
 import "@utils/Structs.sol";
 import "@interfaces/IOrdersInWait.sol";
+import "@interfaces/IPaymentGateway.sol";
 
-contract PaymentGatewayETH is UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
+contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
     mapping(address userWalletId => uint256 amount) private _balances;
     mapping(address userId => uint256[] orderId) private _orders;
     mapping(uint256 orderId => bytes32 messageId) private _ordersMessage;
+    address private _contractReceiver;
+    uint64 private _destinationChainSelector;
+
     function initialize() public initializer {
         __Ownable_init();
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function addToPaymentQueue(uint256 orderId, address contractReceiver) public payable returns (bool result) {
+    function modifyContractReceiver(address receiverContract) public onlyOwner {
+        _contractReceiver = receiverContract;
+    }
+
+    function modifyDestinationChainSelector(uint64 destinationChainSelector_) public onlyOwner {
+        _destinationChainSelector = destinationChainSelector_;
+    }
+
+    function addToPaymentQueue(uint256 orderId) public payable returns (bool result) {
         require(msg.value == 1, Invalid_Value());
+        require(_contractReceiver != address(0), Invalid_ReceiverContract());
+
         _balances[msg.sender] += msg.value;
         _orders[msg.sender].push(orderId);
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
         OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0);
 
-        try IOrdersInWait(contractReceiver).modifyOrderStatus(order) returns (bool ok) {
+        try IOrdersInWait(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
             if (!ok) {
-                IOrdersInWait(contractReceiver).addToOrdersInWaiting(order);
+                IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
             }
         } catch {
-            IOrdersInWait(contractReceiver).addToOrdersInWaiting(order);
+            IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
         }
         emit SendMessage_Events(order.orderId);
         result = true;
     }
 
-    function withDrawBalance() public returns (bool result) {
+    function withDrawBalance() public onlyOwner returns (bool result) {
         (result, ) = payable(owner()).call{ value: address(this).balance }("");
     }
 

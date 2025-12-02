@@ -6,13 +6,15 @@ import "@utils/Roles.sol";
 import "@utils/Errors.sol";
 import "@utils/Events/PaymentPOL_Events.sol";
 import "@utils/Structs.sol";
-
-contract PaymentGatewayPOL is UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
+import "@interfaces/IPaymentGateway.sol";
+contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
     mapping(address userWalletId => uint256 amont) private _balances;
     mapping(address userId => uint256 orderId) private _orders;
     mapping(uint256 orderId => bytes32 messageId) private _ordersMessage;
     IRouterClient private router;
     address private linkToken;
+    address private _contractReceiver;
+    uint64 private _destinationChainSelector;
     function initialize(address _router, address _linkToken) public initializer {
         __Ownable_init();
         __AccessControl_init();
@@ -21,13 +23,25 @@ contract PaymentGatewayPOL is UUPSUpgradeable, OwnableUpgradeable, AccessControl
         linkToken = _linkToken;
     }
 
-    function addToPaymentQueue(uint64 destinationChainSelector, uint256 orderId, address contractReceiver) public payable returns (bytes32 result) {
+    function modifyContractReceiver(address receiverContract) public onlyOwner {
+        _contractReceiver = receiverContract;
+    }
+
+    function modifyDestinationChainSelector(uint64 destinationChainSelector_) public onlyOwner {
+        _destinationChainSelector = destinationChainSelector_;
+    }
+
+    function addToPaymentQueue(uint256 orderId) public payable returns (bool result) {
         require(msg.value == 1, Invalid_Value());
+        require(_contractReceiver != address(0), Invalid_ReceiverContract());
+        require(_destinationChainSelector != 0, Invalid_DestinationChainSelector());
+
         _balances[msg.sender] += msg.value;
         _orders[msg.sender] = orderId;
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
         OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0);
-        result = sendMessage(destinationChainSelector, contractReceiver, order);
+        sendMessage(_destinationChainSelector, _contractReceiver, order);
+        result = true;
     }
 
     function sendMessage(uint64 destinationChainSelector, address contractReceiver, OrdersStruct memory order) private returns (bytes32) {
@@ -48,7 +62,7 @@ contract PaymentGatewayPOL is UUPSUpgradeable, OwnableUpgradeable, AccessControl
         return messageId;
     }
 
-    function withDrawBalance() public returns (bool result) {
+    function withDrawBalance() public onlyOwner returns (bool result) {
         (result, ) = payable(owner()).call{ value: address(this).balance }("");
     }
 
