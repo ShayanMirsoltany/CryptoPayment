@@ -36,5 +36,5 @@ contract DeployOrdersInWait is Script {
 // forge script script/DeployOrdersInWait.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
 // forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x2b95378231D4d00533A8200B62a2aF52B0ad08D0  0x8129fc1c)  0xBEA8A75F356efdcbF14C70c09c5FdFDE7b827715  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
-//cast send 0xDAD57b2C9E3578DB0d6442E2bc696671107788dE "setModifierOrderStatusRole(address)" 0x2ebdE73f456a3bE7fCC9C29F00d679f7600B365F --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast call 0xDAD57b2C9E3578DB0d6442E2bc696671107788dE "getOrderInfo(uint256)" 666555 --rpc-url $env:RPC_SEPOLIA
+//cast send 0x13cB9d752526b3258E8eD4D8B0271Ff9715D0b98 "setModifierOrderStatusRole(address)" 0x8E060eE79F90e5112422E017deae9d30E257dB9d --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast call 0x13cB9d752526b3258E8eD4D8B0271Ff9715D0b98 "getOrderInfo(uint256)" 666555 --rpc-url $env:RPC_SEPOLIA
