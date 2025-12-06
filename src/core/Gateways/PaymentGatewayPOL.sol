@@ -47,7 +47,8 @@ contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
     function sendMessage(uint64 destinationChainSelector, address contractReceiver, OrdersStruct memory order) private returns (bytes32) {
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(contractReceiver),
-            data: abi.encode(order.orderId, order.createdDateTime, order.userId, order.price),
+            data: abi.encode(order.orderId),
+            // data: abi.encode(order.orderId, order.createdDateTime, order.userId, order.price),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             //  tokenAmounts: new Client.EVMTokenAmountClient.EVMTokenAmount({ token: WETH_SEPOLIA, amount: 0.1 ether }),
             extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({ gasLimit: 200_000 })),

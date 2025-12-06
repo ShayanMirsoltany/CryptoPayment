@@ -30,11 +30,11 @@ contract DeployOrdersInWait is Script {
 //     }
 // }
 
-// contract token : 0x2b95378231D4d00533A8200B62a2aF52B0ad08D0
-// proxy address : 0xDAD57b2C9E3578DB0d6442E2bc696671107788dE
+// contract token : 0xF5b63923872ee10c8396fd48ed0ffC7b3Ca13EEC
+// proxy address : 0xF5b63923872ee10c8396fd48ed0ffC7b3Ca13EEC
 
 // forge script script/DeployOrdersInWait.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
 // forge verify-contract --chain sepolia  --verifier etherscan --compiler-version 0.8.30 --watch --constructor-args $(cast abi-encode "constructor(address,bytes)" 0x2b95378231D4d00533A8200B62a2aF52B0ad08D0  0x8129fc1c)  0xBEA8A75F356efdcbF14C70c09c5FdFDE7b827715  lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol:ERC1967Proxy
 
-//cast send 0x246e1679Bbc4BBfEe8914F69b78218F821481A86 "setModifierOrderStatusRole(address)" 0x8E060eE79F90e5112422E017deae9d30E257dB9d --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast call 0x246e1679Bbc4BBfEe8914F69b78218F821481A86 "getOrderInfo(uint256)" 666555 --rpc-url $env:RPC_SEPOLIA
+//cast send 0xF5b63923872ee10c8396fd48ed0ffC7b3Ca13EEC "setModifierOrderStatusRole(address)" 0x76C5Ce687595bF388cb9a7B34dd457585243bb39 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast call 0xF5b63923872ee10c8396fd48ed0ffC7b3Ca13EEC "getOrderInfo(uint256)" 666555 --rpc-url $env:RPC_SEPOLIA

@@ -15,6 +15,7 @@ contract OrdersInWait is IOrdersInWait, CCIPReceiver, Ownable, AccessControl {
         _grantRole(ModifierOrderStatus_Role, msg.sender);
     }
     mapping(uint256 orderId => OrdersStruct info) private _ordersInfo;
+    event OrderReceived(uint256 orderID);
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(CCIPReceiver, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
@@ -28,9 +29,13 @@ contract OrdersInWait is IOrdersInWait, CCIPReceiver, Ownable, AccessControl {
     }
 
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
-        (uint256 orderId, uint256 createdDateTime, address userId, uint256 price) = abi.decode(message.data, (uint256, uint256, address, uint256));
+        emit OrderReceived(123456);
+        (uint256 orderId) = abi.decode(message.data, (uint256));
+        emit OrderReceived(orderId);
+
+        // (uint256 orderId, uint256 createdDateTime, address userId, uint256 price) = abi.decode(message.data, (uint256, uint256, address, uint256));
         // _ordersInfo[orderId] = OrdersStruct(orderId, userId, price, true, createdDateTime, block.timestamp);
-        emit OrderReceived_Event(message.messageId, orderId, userId);
+        // emit OrderReceived_Event(message.messageId, orderId, userId);
     }
 
     function addToOrdersInWaiting(OrdersStruct memory order) external override onlyRole(ModifierOrderStatus_Role) returns (bool result) {
