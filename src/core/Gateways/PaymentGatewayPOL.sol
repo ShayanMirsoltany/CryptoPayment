@@ -23,6 +23,10 @@ contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         linkToken = _linkToken;
     }
 
+    function getReceiverContract() public view returns (address) {
+        return _contractReceiver;
+    }
+
     function modifyContractReceiver(address receiverContract) public onlyOwner {
         _contractReceiver = receiverContract;
     }
@@ -40,29 +44,24 @@ contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         _orders[msg.sender] = orderId;
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
         OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0);
-        sendMessage(_destinationChainSelector, _contractReceiver, order);
-        result = true;
-    }
 
-    function sendMessage(uint64 destinationChainSelector, address contractReceiver, OrdersStruct memory order) private returns (bytes32) {
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-            receiver: abi.encode(contractReceiver),
-            data: abi.encode(order.orderId),
-            // data: abi.encode(order.orderId, order.createdDateTime, order.userId, order.price),
+            receiver: abi.encode(_contractReceiver),
+            data: abi.encode(order.orderId, order.createdDateTime, order.userId, order.price),
             tokenAmounts: new Client.EVMTokenAmount[](0),
-            //  tokenAmounts: new Client.EVMTokenAmountClient.EVMTokenAmount({ token: WETH_SEPOLIA, amount: 0.1 ether }),
             extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({ gasLimit: 200_000 })),
             feeToken: linkToken
         });
-        uint256 fee = router.getFee(destinationChainSelector, message);
+        uint256 fee = router.getFee(_destinationChainSelector, message);
         require(fee > 0, Invalid_Fee());
         LinkTokenInterface(linkToken).approve(address(router), fee);
-        bytes32 messageId = router.ccipSend(destinationChainSelector, message);
+        bytes32 messageId = router.ccipSend(_destinationChainSelector, message);
         _ordersMessage[order.orderId] = messageId;
         emit SendMessage_Events(order.orderId, messageId);
-        return messageId;
+        result = true;
     }
-
+    // data: abi.encode(order.orderId, order.createdDateTime, order.userId, order.price),
+    //  tokenAmounts: new Client.EVMTokenAmountClient.EVMTokenAmount({ token: WETH_SEPOLIA, amount: 0.1 ether }),
     function withDrawBalance() public onlyOwner returns (bool result) {
         (result, ) = payable(owner()).call{ value: address(this).balance }("");
     }
