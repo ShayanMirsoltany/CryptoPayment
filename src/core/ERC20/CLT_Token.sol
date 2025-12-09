@@ -6,13 +6,24 @@ import "@openzeppelin-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/extensions/ERC20CappedUpgradeable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 
-contract CLT_Token is ERC20CappedUpgradeable, ERC20PausableUpgradeable, ERC20BurnableUpgradeable, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
+contract CLT_Token is
+    ERC20Upgradeable,
+    ERC20CappedUpgradeable,
+    ERC20PausableUpgradeable,
+    ERC20BurnableUpgradeable,
+    ERC20PermitUpgradeable,
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    AccessControlUpgradeable
+{
     function initialize(string calldata name_, string calldata symbol_, uint256 cap_) public initializer {
         __ERC20_init(name_, symbol_);
         __ERC20Capped_init(cap_);
         __ERC20Pausable_init();
         __ERC20Burnable_init();
+        __ERC20Permit_init(name_);
         __Ownable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(Pauser_Role, msg.sender);

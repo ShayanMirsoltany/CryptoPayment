@@ -6,3 +6,10 @@ interface IPaymentGateway {
     function modifyContractReceiver(address receiverContract) external;
     function modifyDestinationChainSelector(uint64 destinationChainSelector_) external;
 }
+
+interface IPaymentCLTGateway {
+    function payWithPermit(uint256 orderId, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external returns (bool);
+    function withDrawBalance() external returns (bool result);
+    function modifyContractReceiver(address receiverContract) external;
+    function modifyDestinationChainSelector(uint64 destinationChainSelector_) external;
+}

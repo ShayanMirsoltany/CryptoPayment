@@ -10,6 +10,7 @@ remappings=[
     "@interfaces/=src/interfaces",
     "forge-std/=lib/forge-std/src",
     "@chainlink/=lib/chainlink-brownie-contracts/contracts/",
+    "@erc20/=src/core/ERC20/",
     "@ccip-contracts/=lib/ccip-contracts/contracts/",
     "@openzeppelin=lib/openzeppelin-contracts/contracts",
     "@openzeppelin-upgradeable=lib/openzeppelin-contracts-upgradeable/contracts"
