@@ -60,7 +60,7 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
     }
 
     function withDrawBalance() external onlyOwner returns (bool result) {
-        uint256 balance = CLT_Token(cl tToken).balanceOf(address(this));
+        uint256 balance = CLT_Token(cltToken).balanceOf(address(this));
         result = CLT_Token(cltToken).transfer(owner(), balance);
     }
 
@@ -118,7 +118,7 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
 //             deadline
 //         );
 
-//         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);  
+//         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
 //         // (۱ = privateKey برای USER)
 
 //         // ---- Call payWithPermit ----

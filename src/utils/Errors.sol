@@ -4,3 +4,7 @@ error Invalid_Value();
 error Invalid_Fee();
 error Invalid_ReceiverContract();
 error Invalid_DestinationChainSelector();
+
+error Invalid_Role();
+error Duplicated_Token();
+error Invalid_Owner_Approved();
