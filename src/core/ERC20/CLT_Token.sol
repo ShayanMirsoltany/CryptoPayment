@@ -47,6 +47,10 @@ contract CLT_Token is
         _unpause();
     }
 
+    function mint(address account, uint256 amount) public {
+        _mint(account, amount);
+    }
+
     function _mint(address account, uint256 amount) internal override(ERC20Upgradeable, ERC20CappedUpgradeable) {
         super._mint(account, amount);
     }
