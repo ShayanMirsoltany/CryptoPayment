@@ -1,0 +1,5 @@
+CLT_TokenTest:testBurn() (gas: 113063)
+CLT_TokenTest:testBurnFrom() (gas: 95050)
+CLT_TokenTest:testPause() (gas: 118960)
+CLT_TokenTest:test_Balance() (gas: 72835)
+CLT_TokenTest:test_TransferFrom() (gas: 123662)

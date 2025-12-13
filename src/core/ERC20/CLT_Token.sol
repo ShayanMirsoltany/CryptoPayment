@@ -28,7 +28,7 @@ contract CLT_Token is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(Pauser_Role, msg.sender);
         _grantRole(Burner_Role, msg.sender);
-        _mint(msg.sender, cap_);
+        // _mint(msg.sender, cap_);
     }
 
     function burn(uint256 amount) public virtual override onlyRole(Burner_Role) {
