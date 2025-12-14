@@ -55,7 +55,7 @@ contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         result = true;
     }
 
-    function getBalance() public onlyOwner returns (uint256 result) {
+    function getBalance() public view onlyOwner returns (uint256 result) {
         return address(this).balance;
     }
 

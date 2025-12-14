@@ -26,7 +26,9 @@ contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
     function getReceiverContract() public view returns (address) {
         return _contractReceiver;
     }
-
+    function getBalance() public view onlyOwner returns (uint256 result) {
+        return address(this).balance;
+    }
     function modifyContractReceiver(address receiverContract) public onlyOwner {
         _contractReceiver = receiverContract;
     }

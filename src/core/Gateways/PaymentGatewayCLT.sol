@@ -59,6 +59,10 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
         result = true;
     }
 
+    function getBalance() public view onlyOwner returns (uint256 result) {
+        return address(this).balance;
+    }
+
     function withDrawBalance() external onlyOwner returns (bool result) {
         uint256 balance = CLT_Token(cltToken).balanceOf(address(this));
         result = CLT_Token(cltToken).transfer(owner(), balance);
