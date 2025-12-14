@@ -23,6 +23,10 @@ contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    function getReceiverContract() public view returns (address) {
+        return _contractReceiver;
+    }
+
     function modifyContractReceiver(address receiverContract) public onlyOwner {
         _contractReceiver = receiverContract;
     }
@@ -49,6 +53,10 @@ contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         }
         emit SendMessage_Events(order.orderId);
         result = true;
+    }
+
+    function getBalance() public onlyOwner returns (uint256 result) {
+        return address(this).balance;
     }
 
     function withDrawBalance() public onlyOwner returns (bool result) {
