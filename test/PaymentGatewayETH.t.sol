@@ -75,10 +75,23 @@ contract PaymentGatewayETHTest is Test {
         address receiverContract = address(ordersInWait);
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
         ordersInWait.setModifierOrderStatusRole(ethGatewayProxy);
-        uint256 orderID = 123456;
         vm.assertEq(PaymentGatewayETH(ethGatewayProxy).getBalance(), 0);
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+        uint256 orderID = 123456;
         PaymentGatewayETH(ethGatewayProxy).addToPaymentQueue{ value: 1 wei }(orderID);
+        vm.assertEq(PaymentGatewayETH(ethGatewayProxy).getUserBalance(), 1);
+        vm.stopPrank();
+
+        vm.startPrank(address(this));
         vm.assertEq(PaymentGatewayETH(ethGatewayProxy).getBalance(), 1);
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+        orderID = 123458;
+        PaymentGatewayETH(ethGatewayProxy).addToPaymentQueue{ value: 1 wei }(orderID);
+        vm.assertEq(PaymentGatewayETH(ethGatewayProxy).getUserBalance(), 2);
         vm.stopPrank();
     }
 
@@ -88,8 +101,9 @@ contract PaymentGatewayETHTest is Test {
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
         ordersInWait.setModifierOrderStatusRole(ethGatewayProxy);
         uint256 orderID = 123456;
+        uint256 dateTime = block.timestamp;
         vm.expectEmit(true, false, false, true);
-        emit AddToPaymentQueue_Event(address(this), orderID, block.timestamp);
+        emit AddToPaymentQueue_Event(address(this), orderID, dateTime);
         PaymentGatewayETH(ethGatewayProxy).addToPaymentQueue{ value: 1 wei }(orderID);
         vm.stopPrank();
     }

@@ -13,7 +13,6 @@ import "@interfaces/IPaymentGateway.sol";
 contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
     mapping(address userWalletId => uint256 amount) private _balances;
     mapping(address userId => uint256[] orderId) private _orders;
-    mapping(uint256 orderId => bytes32 messageId) private _ordersMessage;
     address private _contractReceiver;
     uint64 private _destinationChainSelector;
 
@@ -53,6 +52,10 @@ contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         }
         emit SendMessage_Events(order.orderId);
         result = true;
+    }
+
+    function getUserBalance() public view returns (uint256 result) {
+        return _balances[msg.sender];
     }
 
     function getBalance() public view onlyOwner returns (uint256 result) {

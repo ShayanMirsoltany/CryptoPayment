@@ -59,6 +59,10 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
         result = true;
     }
 
+    function getUserBalance() public view returns (uint256 result) {
+        return _balances[msg.sender];
+    }
+
     function getBalance() public view onlyOwner returns (uint256 result) {
         return address(this).balance;
     }
