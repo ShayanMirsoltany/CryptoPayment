@@ -18,7 +18,7 @@ contract CLT_Token is
     OwnableUpgradeable,
     AccessControlUpgradeable
 {
-    event cashBackEvent(uint256 orderId, address receiver, uint256 amount, uint256 cashBackAmount, uint256 datetime);
+    event cashBackEvent(uint256 orderId, address indexed receiver, uint256 amount, uint256 cashBackAmount, uint256 datetime);
     function initialize(string calldata name_, string calldata symbol_, uint256 cap_) public initializer {
         __ERC20_init(name_, symbol_);
         __ERC20Capped_init(cap_);

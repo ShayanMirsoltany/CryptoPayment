@@ -9,6 +9,8 @@ import "@openzeppelin/utils/Strings.sol";
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 contract PaymentGatewayCLTTest is Test {
+    event cashBackEvent(uint256 orderId, address receiver, uint256 amount, uint256 cashBackAmount, uint256 datetime);
+
     address tokenProxy;
     address payable cltGatewayProxy;
     OrdersInWait ordersInWait;
@@ -211,6 +213,8 @@ contract PaymentGatewayCLTTest is Test {
 
         vm.startPrank(user1);
         uint256 cashBackAmount = (amount * 10) / 100;
+        vm.expectEmit(false, true, false, false);
+        emit cashBackEvent(orderId, user1, amount, cashBackAmount, block.timestamp);
         PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.assertEq(CLT_Token(tokenProxy).balanceOf(user1), 10000 - amount + cashBackAmount);
         vm.stopPrank();
