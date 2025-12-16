@@ -15,16 +15,16 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
     mapping(address userId => uint256[] orderId) private _orders;
     mapping(uint256 orderId => bytes32 messageId) private _ordersMessage;
 
-    IRouterClient private router;
-    address private linkToken;
-    address private cltToken;
+    IRouterClient private _router;
+    address private _linkToken;
+    address private _cltToken;
     address private _contractReceiver;
     uint64 private _destinationChainSelector;
-    function initialize(address _cltToken) public initializer {
+    function initialize(address cltToken_) public initializer {
         __Ownable_init();
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        cltToken = _cltToken;
+        _cltToken = cltToken_;
     }
 
     function getReceiverContract() external view returns (address) {
@@ -42,9 +42,9 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
     function payWithPermit(uint256 orderId, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external returns (bool result) {
         require(_contractReceiver != address(0), Invalid_ReceiverContract());
         require(amount == 100, Invalid_Value());
-        CLT_Token(cltToken).permit(msg.sender, address(this), amount, deadline, v, r, s);
+        CLT_Token(_cltToken).permit(msg.sender, address(this), amount, deadline, v, r, s);
 
-        require(CLT_Token(cltToken).transferFrom(msg.sender, address(this), amount), "CLT transfer failed");
+        require(CLT_Token(_cltToken).transferFrom(msg.sender, address(this), amount), "CLT transfer failed");
 
         _orders[msg.sender].push(orderId);
         OrdersStruct memory order = OrdersStruct(orderId, msg.sender, amount, false, block.timestamp, 0);
@@ -58,7 +58,7 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
         }
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
 
-        CLT_Token(cltToken).CalcCashBack(orderId, msg.sender, amount);
+        CLT_Token(_cltToken).CalcCashBack(orderId, msg.sender, amount);
         result = true;
     }
 
@@ -71,8 +71,8 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
     }
 
     function withDrawBalance() external onlyOwner returns (bool result) {
-        uint256 balance = CLT_Token(cltToken).balanceOf(address(this));
-        result = CLT_Token(cltToken).transfer(owner(), balance);
+        uint256 balance = CLT_Token(_cltToken).balanceOf(address(this));
+        result = CLT_Token(_cltToken).transfer(owner(), balance);
     }
 
     receive() external payable {
