@@ -40,7 +40,7 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
 
     function payWithPermit(uint256 orderId, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external returns (bool result) {
         require(_contractReceiver != address(0), Invalid_ReceiverContract());
-        require(_destinationChainSelector != 0, Invalid_DestinationChainSelector());
+        require(amount == 100, Invalid_Value());
         CLT_Token(cltToken).permit(msg.sender, address(this), amount, deadline, v, r, s);
 
         require(CLT_Token(cltToken).transferFrom(msg.sender, address(this), amount), "CLT transfer failed");
@@ -109,67 +109,4 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
 //         gateway.modifyDestinationChainSelector(16015286601757825753); // Sepolia
 //     }
 
-//     function test_payWithPermit() public {
-//         uint256 orderId = 1;
-//         uint256 amount = 100 ether;
-
-//         // ---- USER signs permit ----
-
-//         uint256 deadline = block.timestamp + 1 hours;
-//         uint256 nonce = clt.nonces(USER);
-
-//         bytes32 digest = getPermitDigest(
-//             USER,
-//             address(gateway),
-//             amount,
-//             nonce,
-//             deadline
-//         );
-
-//         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, digest);
-//         // (۱ = privateKey برای USER)
-
-//         // ---- Call payWithPermit ----
-//         vm.prank(USER);
-//         bool ok = gateway.payWithPermit(orderId, amount, deadline, v, r, s);
-//         assertTrue(ok);
-
-//         // ---- Check results ----
-//         assertEq(clt.balanceOf(address(gateway)), amount, "Gateway did not receive CLT");
-//         assertEq(clt.balanceOf(USER), 1000 ether - amount, "User CLT not deducted");
-//     }
-
-//     // -------------------------------------------------------------------------------------------------
-//     // Helper: Create EIP-712 digest for CLT permit()
-//     // -------------------------------------------------------------------------------------------------
-
-//     function getPermitDigest(
-//         address owner,
-//         address spender,
-//         uint256 value,
-//         uint256 nonce,
-//         uint256 deadline
-//     ) internal view returns (bytes32) {
-//         bytes32 PERMIT_TYPEHASH =
-//             keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-
-//         bytes32 structHash = keccak256(
-//             abi.encode(
-//                 PERMIT_TYPEHASH,
-//                 owner,
-//                 spender,
-//                 value,
-//                 nonce,
-//                 deadline
-//             )
-//         );
-
-//         return keccak256(
-//             abi.encodePacked(
-//                 "\x19\x01",
-//                 clt.DOMAIN_SEPARATOR(),
-//                 structHash
-//             )
-//         );
-//     }
 // }

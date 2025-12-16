@@ -47,7 +47,7 @@ contract CLT_Token is
         _unpause();
     }
 
-    function mint(address account, uint256 amount) public {
+    function mint(address account, uint256 amount) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _mint(account, amount);
     }
 
