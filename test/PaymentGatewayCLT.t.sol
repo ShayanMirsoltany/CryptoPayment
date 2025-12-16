@@ -39,7 +39,7 @@ contract PaymentGatewayCLTTest is Test {
         CLT_Token(tokenProxy).grantRole(CashBack_Role, cltGatewayProxy);
     }
 
-    function test_cltBalance() public {
+    function testCltBalance() public {
         vm.startPrank(address(this));
         CLT_Token(tokenProxy).mint(user1, 10000);
         vm.stopPrank();
@@ -49,7 +49,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
     }
 
-    function test_modifyContractReceiver() public {
+    function testModifyContractReceiver() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         vm.assertEq(PaymentGatewayCLT(cltGatewayProxy).getReceiverContract(), address(0));
@@ -58,7 +58,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
     }
 
-    function test_addToPaymentQueue_Invalid_ReceiverContract() public {
+    function testAddToPaymentQueue_Invalid_ReceiverContract() public {
         vm.startPrank(user1);
         uint256 orderID = 123456;
         vm.expectRevert(Invalid_ReceiverContract.selector);
@@ -66,7 +66,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
     }
 
-    function test_addToPaymentQueue_Invalid_Value() public {
+    function testAddToPaymentQueueInvalidValue() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
@@ -79,7 +79,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
     }
 
-    function test_payWithPermit_CheckBalance() public {
+    function testPayWithPermitCheckBalance() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
@@ -105,7 +105,7 @@ contract PaymentGatewayCLTTest is Test {
         assertEq(CLT_Token(tokenProxy).balanceOf(user1), 10000 - amount + cashBackAmount, "User CLT not deducted");
     }
 
-    function test_payWithPermit_AddToPaymentQueue_Event() public {
+    function testPayWithPermit_AddToPaymentQueue_Event() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
@@ -123,11 +123,11 @@ contract PaymentGatewayCLTTest is Test {
         vm.startPrank(user1);
         vm.expectEmit(true, false, false, true);
         emit AddToPaymentQueue_Event(user1, orderId, block.timestamp);
-        bool ok = PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
     }
 
-    function test_payWithPermit_ReceiverCheckRole() public {
+    function testPayWithPermit_ReceiverCheckRole() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
@@ -143,11 +143,11 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
         vm.startPrank(user1);
         vm.expectRevert();
-        bool ok = PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
     }
 
-    function test_payWithPermit_CheckStatus() public {
+    function testPayWithPermit_CheckStatus() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
@@ -163,12 +163,12 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
 
         vm.startPrank(user1);
-        bool ok = PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.assertEq(ordersInWait.getOrderInfo(orderId), true);
         vm.stopPrank();
     }
 
-    function test_withDrawBalance() public {
+    function testWithDrawBalance() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
@@ -184,7 +184,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
 
         vm.startPrank(user1);
-        bool ok = PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
 
         vm.startPrank(address(this));
@@ -196,7 +196,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
     }
 
-    function test_cashBack() public {
+    function testCashBack() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);
         PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
