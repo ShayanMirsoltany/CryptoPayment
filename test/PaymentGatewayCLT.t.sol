@@ -17,8 +17,8 @@ contract PaymentGatewayCLTTest is Test {
     address user2;
     CLT_Token token;
     constructor() {
-        user1 = vm.addr(0x100);
         user1PK = 0x100;
+        user1 = vm.addr(user1PK);
         user2 = vm.addr(0x200);
     }
 
@@ -33,6 +33,8 @@ contract PaymentGatewayCLTTest is Test {
         PaymentGatewayCLT cltgateway = new PaymentGatewayCLT();
         bytes memory data2 = abi.encodeCall(cltgateway.initialize, (tokenProxy));
         cltGatewayProxy = payable(address(new ERC1967Proxy(address(cltgateway), data2)));
+
+        CLT_Token(tokenProxy).grantRole(CashBack_Role, cltGatewayProxy);
     }
 
     function test_cltBalance() public {
@@ -95,8 +97,10 @@ contract PaymentGatewayCLTTest is Test {
         bool ok = PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
         assertTrue(ok);
+
+        uint256 cashBackAmount = (amount * 10) / 100;
         assertEq(CLT_Token(tokenProxy).balanceOf(cltGatewayProxy), amount, "Gateway did not receive CLT");
-        assertEq(CLT_Token(tokenProxy).balanceOf(user1), 10000 - amount, "User CLT not deducted");
+        assertEq(CLT_Token(tokenProxy).balanceOf(user1), 10000 - amount + cashBackAmount, "User CLT not deducted");
     }
 
     function test_payWithPermit_AddToPaymentQueue_Event() public {
@@ -187,6 +191,28 @@ contract PaymentGatewayCLTTest is Test {
         bool result = PaymentGatewayCLT(cltGatewayProxy).withDrawBalance();
         vm.assertTrue(result);
         vm.assertEq(CLT_Token(tokenProxy).balanceOf(address(this)), 100);
+        vm.stopPrank();
+    }
+
+    function test_cashBack() public {
+        vm.startPrank(address(this));
+        address receiverContract = address(ordersInWait);
+        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        ordersInWait.setModifierOrderStatusRole(cltGatewayProxy);
+        CLT_Token(tokenProxy).mint(user1, 10000);
+
+        uint256 orderId = 123456;
+        uint256 amount = 100 wei;
+        uint256 deadline = block.timestamp + 1 hours;
+        uint256 nonce = CLT_Token(tokenProxy).nonces(user1);
+        bytes32 digest = getPermitDigest(user1, cltGatewayProxy, amount, nonce, deadline);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(user1PK, digest);
+        vm.stopPrank();
+
+        vm.startPrank(user1);
+        uint256 cashBackAmount = (amount * 10) / 100;
+        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        vm.assertEq(CLT_Token(tokenProxy).balanceOf(user1), 10000 - amount + cashBackAmount);
         vm.stopPrank();
     }
 

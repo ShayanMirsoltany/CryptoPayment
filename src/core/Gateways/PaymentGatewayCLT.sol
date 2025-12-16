@@ -56,6 +56,8 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
             IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
         }
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
+
+        CLT_Token(cltToken).CalcCashBack(orderId, msg.sender, amount);
         result = true;
     }
 
