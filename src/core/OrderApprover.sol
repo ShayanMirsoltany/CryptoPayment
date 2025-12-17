@@ -57,14 +57,18 @@ contract OrderApprover is IOrderApprover, AccessControl, Ownable, CCIPReceiver {
         order.success = true;
         order.modfiedDateTime = block.timestamp;
         _ordersInfo[order.orderId] = order;
-        result = true;
-        if (order.nativeToken && !CLT_Token(_token).paused()) CalcCashBack(order.orderId, order.userId, order.price);
-        emit ModifyOrderStatus_Event(order.orderId, order.modfiedDateTime);
+        result = approveOrder(order.orderId);
+        if (result && order.nativeToken && !CLT_Token(_token).paused()) {
+            CalcCashBack(order.orderId, order.userId, order.price);
+            emit ModifyOrderStatus_Event(order.orderId, order.modfiedDateTime);
+        }
     }
 
     function getOrderInfo(uint256 orderId) public view override returns (bool result) {
         return _ordersInfo[orderId].success;
     }
+
+    function approveOrder(uint256 orderId) internal returns (bool result) {}
 
     // function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }

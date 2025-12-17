@@ -10,7 +10,6 @@ interface IPaymentGateway {
 }
 
 interface IPaymentCLTGateway {
-    // function getUserBalance() external view returns (uint256 result);
     function getBalance() external view returns (uint256 result);
     function payWithPermit(uint256 orderId, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external returns (bool);
     function withDrawBalance() external returns (bool result);

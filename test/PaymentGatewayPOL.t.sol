@@ -12,12 +12,11 @@ import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 contract RouterMock {
     uint256 public fee = 1 ether;
     bytes32 public lastMessageId;
-
     function getFee(uint64, Client.EVM2AnyMessage calldata) external view returns (uint256) {
         return fee;
     }
 
-    function ccipSend(uint64, Client.EVM2AnyMessage calldata) external returns (bytes32) {
+    function ccipSend(uint64, Client.EVM2AnyMessage calldata message) external returns (bytes32) {
         lastMessageId = keccak256("mock-message");
         return lastMessageId;
     }
@@ -88,5 +87,41 @@ contract PaymentGatewayPOLTest is Test {
         vm.expectRevert(Invalid_Value.selector);
         polGatewayProxy.addToPaymentQueue(orderID);
         vm.stopPrank();
+    }
+
+    function testAddToPaymentQueue_CCIP_Send_Success() public {
+        polGatewayProxy.modifyContractReceiver(address(orderApprover));
+        uint256 orderId = 123456;
+        vm.startPrank(user);
+
+        vm.expectEmit(true, false, false, true);
+        emit AddToPaymentQueue_Event(user, orderId, block.timestamp);
+
+        vm.expectEmit(false, false, false, true);
+        emit SendMessage_Events(orderId, keccak256("mock-message"));
+
+        bool result = polGatewayProxy.addToPaymentQueue{ value: 1 }(orderId);
+        vm.stopPrank();
+
+        assertTrue(result);
+        assertEq(router.lastMessageId(), keccak256("mock-message"));
+    }
+
+    function testAddToPaymentQueue_CheckStatus() public {
+        polGatewayProxy.modifyContractReceiver(address(orderApprover));
+        uint256 orderId = 123456;
+        vm.startPrank(user);
+
+        vm.expectEmit(true, false, false, true);
+        emit AddToPaymentQueue_Event(user, orderId, block.timestamp);
+
+        vm.expectEmit(false, false, false, true);
+        emit SendMessage_Events(orderId, keccak256("mock-message"));
+
+        polGatewayProxy.addToPaymentQueue{ value: 1 }(orderId);
+        vm.stopPrank();
+
+        orderApprover.modifyOrderStatus(OrdersStruct(orderId, user, 1, false, block.timestamp, 0, false));
+        vm.assertEq(orderApprover.getOrderInfo(orderId), true);
     }
 }
