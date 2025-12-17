@@ -7,7 +7,7 @@ import "@utils/Errors.sol";
 import "@utils/Events/PaymentCLT_Events.sol";
 import "@utils/Structs.sol";
 import "@interfaces/IPaymentGateway.sol";
-import "@interfaces/IOrdersInWait.sol";
+import "@interfaces/IOrderApprover.sol";
 import "@erc20/CLT_Token.sol";
 
 contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
@@ -50,12 +50,12 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
         _orders[msg.sender].push(orderId);
         OrdersStruct memory order = OrdersStruct(orderId, msg.sender, amount, false, block.timestamp, 0, true);
 
-        try IOrdersInWait(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
+        try IOrderApprover(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
             if (!ok) {
-                IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
+                IOrderApprover(_contractReceiver).addToOrdersInWaiting(order);
             }
         } catch {
-            IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
+            IOrderApprover(_contractReceiver).addToOrdersInWaiting(order);
         }
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
         result = true;

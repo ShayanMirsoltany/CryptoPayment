@@ -4,7 +4,7 @@ import "@utils/Roles.sol";
 import "@utils/Errors.sol";
 import "@erc20/CLT_Token.sol";
 import "@core/Gateways/PaymentGatewayPOL.sol";
-import "@core/OrdersInWait.sol";
+import "@core/OrderApprover.sol";
 
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
@@ -37,7 +37,7 @@ contract PaymentGatewayPOLTest is Test {
     RouterMock router;
     LinkTokenMock linkToken;
     address tokenProxy;
-    OrdersInWait ordersInWait;
+    OrderApprover orderApprover;
     CLT_Token token;
 
     address user;
@@ -50,7 +50,7 @@ contract PaymentGatewayPOLTest is Test {
         bytes memory data = abi.encodeCall(token.initialize, ("Chainlinker", "CLT", 100_000_000 ether));
         tokenProxy = address(new ERC1967Proxy(address(token), data));
 
-        ordersInWait = new OrdersInWait(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, tokenProxy);
+        orderApprover = new OrderApprover(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, tokenProxy);
         router = new RouterMock();
         linkToken = new LinkTokenMock();
 
@@ -63,7 +63,7 @@ contract PaymentGatewayPOLTest is Test {
 
     function testModifyContractReceiver() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         vm.assertEq(polGatewayProxy.getReceiverContract(), address(0));
         polGatewayProxy.modifyContractReceiver(receiverContract);
         vm.assertEq(polGatewayProxy.getReceiverContract(), receiverContract);

@@ -5,12 +5,12 @@ import "@utils/Events/OrdersInWait_Event.sol";
 import "@utils/Structs.sol";
 import "@utils/Roles.sol";
 import "@erc20/CLT_Token.sol";
-import "@interfaces/IOrdersInWait.sol";
+import "@interfaces/IOrderApprover.sol";
 import "@openzeppelin/access/AccessControl.sol";
 import "@openzeppelin/access/Ownable.sol";
 import { CCIPReceiver } from "@ccip-contracts/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import { Client } from "@ccip-contracts/src/v0.8/ccip/libraries/Client.sol";
-contract OrdersInWait is IOrdersInWait, AccessControl, Ownable, CCIPReceiver {
+contract OrderApprover is IOrderApprover, AccessControl, Ownable, CCIPReceiver {
     address private _token;
     constructor(address router, address token) CCIPReceiver(router) {
         _token = token;

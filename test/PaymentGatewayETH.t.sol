@@ -4,14 +4,14 @@ import "@utils/Roles.sol";
 import "@utils/Errors.sol";
 import "@erc20/CLT_Token.sol";
 import "@core/Gateways/PaymentGatewayETH.sol";
-import "@core/OrdersInWait.sol";
+import "@core/OrderApprover.sol";
 
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 contract PaymentGatewayETHTest is Test {
     address tokenProxy;
     address payable ethGatewayProxy;
-    OrdersInWait ordersInWait;
+    OrderApprover orderApprover;
     address _cltToken = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
     address user1;
     address user2;
@@ -23,7 +23,7 @@ contract PaymentGatewayETHTest is Test {
     function setUp() public {
         vm.deal(user1, 10 ether);
         vm.deal(user2, 10 ether);
-        ordersInWait = new OrdersInWait(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, _cltToken);
+        orderApprover = new OrderApprover(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, _cltToken);
         CLT_Token token = new CLT_Token();
         bytes memory data = abi.encodeCall(token.initialize, ("Chainlinker", "CLT", 100_000_000 ether));
         tokenProxy = address(new ERC1967Proxy(address(token), data));
@@ -35,7 +35,7 @@ contract PaymentGatewayETHTest is Test {
 
     function test_modifyContractReceiver() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         vm.assertEq(PaymentGatewayETH(ethGatewayProxy).getReceiverContract(), address(0));
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
         vm.assertEq(PaymentGatewayETH(ethGatewayProxy).getReceiverContract(), receiverContract);
@@ -44,7 +44,7 @@ contract PaymentGatewayETHTest is Test {
 
     function test_addToPaymentQueue_Invalid_Value() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
         uint256 orderID = 123456;
         vm.expectRevert(Invalid_Value.selector);
@@ -62,7 +62,7 @@ contract PaymentGatewayETHTest is Test {
 
     function test_addToPaymentQueue_ReceiverCheckRole() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
 
         uint256 orderID = 123456;
@@ -73,9 +73,9 @@ contract PaymentGatewayETHTest is Test {
 
     function test_addToPaymentQueue_getBalance() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
-        ordersInWait.setModifierOrderStatusRole(ethGatewayProxy);
+        orderApprover.setModifierOrderStatusRole(ethGatewayProxy);
         vm.assertEq(PaymentGatewayETH(ethGatewayProxy).getBalance(), 0);
         vm.stopPrank();
 
@@ -98,9 +98,9 @@ contract PaymentGatewayETHTest is Test {
 
     function test_addToPaymentQueue_AddToPaymentQueue_Event() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
-        ordersInWait.setModifierOrderStatusRole(ethGatewayProxy);
+        orderApprover.setModifierOrderStatusRole(ethGatewayProxy);
         uint256 orderID = 123456;
         uint256 dateTime = block.timestamp;
         vm.expectEmit(true, false, false, true);
@@ -111,21 +111,21 @@ contract PaymentGatewayETHTest is Test {
 
     function test_addToPaymentQueue_CheckStatus() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
-        ordersInWait.setModifierOrderStatusRole(ethGatewayProxy);
+        orderApprover.setModifierOrderStatusRole(ethGatewayProxy);
 
         uint256 orderId = 123456;
         PaymentGatewayETH(ethGatewayProxy).addToPaymentQueue{ value: 1 wei }(orderId);
-        vm.assertEq(ordersInWait.getOrderInfo(orderId), true);
+        vm.assertEq(orderApprover.getOrderInfo(orderId), true);
         vm.stopPrank();
     }
 
     function test_withDrawBalance() public {
         vm.startPrank(address(this));
-        address receiverContract = address(ordersInWait);
+        address receiverContract = address(orderApprover);
         PaymentGatewayETH(ethGatewayProxy).modifyContractReceiver(receiverContract);
-        ordersInWait.setModifierOrderStatusRole(ethGatewayProxy);
+        orderApprover.setModifierOrderStatusRole(ethGatewayProxy);
         vm.stopPrank();
         uint256 currentBalance = address(this).balance;
 

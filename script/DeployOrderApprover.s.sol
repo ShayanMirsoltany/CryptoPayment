@@ -2,9 +2,9 @@
 pragma solidity ^0.8.30;
 import "forge-std/Script.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-import "@core/OrdersInWait.sol";
+import "@core/OrderApprover.sol";
 
-contract DeployOrdersInWait is Script {
+contract DeployOrderApprover is Script {
     function run() public {
         vm.startBroadcast();
 
@@ -12,7 +12,7 @@ contract DeployOrdersInWait is Script {
         address _cltToken = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
         // address _linkToken = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
         // uint256 _chainSelector = 16015286601757825753;
-        OrdersInWait impl = new OrdersInWait(_router, _cltToken);
+        OrderApprover impl = new OrderApprover(_router, _cltToken);
         // bytes memory data = abi.encodeCall(OrdersInWait.initialize, (_router));
         // address proxy = address(new ERC1967Proxy(address(impl), data));
         // console.log("OrdersInWait proxy : ", proxy);

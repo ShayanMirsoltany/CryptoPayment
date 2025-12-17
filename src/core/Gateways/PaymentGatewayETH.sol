@@ -2,12 +2,12 @@
 pragma solidity ^0.8.30;
 import "@share/_upgradeContracts.sol";
 import "@share/_ccip_Sender.sol";
-import "@core/OrdersInWait.sol";
+import "@core/OrderApprover.sol";
 import "@utils/Roles.sol";
 import "@utils/Errors.sol";
 import "@utils/Events/PaymentETH_Events.sol";
 import "@utils/Structs.sol";
-import "@interfaces/IOrdersInWait.sol";
+import "@interfaces/IOrderApprover.sol";
 import "@interfaces/IPaymentGateway.sol";
 
 contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
@@ -43,12 +43,12 @@ contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
         OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0, false);
 
-        try IOrdersInWait(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
+        try IOrderApprover(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
             if (!ok) {
-                IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
+                IOrderApprover(_contractReceiver).addToOrdersInWaiting(order);
             }
         } catch {
-            IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
+            IOrderApprover(_contractReceiver).addToOrdersInWaiting(order);
         }
         emit SendMessage_Events(order.orderId);
         result = true;
