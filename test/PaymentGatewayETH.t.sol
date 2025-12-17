@@ -12,6 +12,7 @@ contract PaymentGatewayETHTest is Test {
     address tokenProxy;
     address payable ethGatewayProxy;
     OrdersInWait ordersInWait;
+    address _cltToken = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
     address user1;
     address user2;
     constructor() {
@@ -22,7 +23,7 @@ contract PaymentGatewayETHTest is Test {
     function setUp() public {
         vm.deal(user1, 10 ether);
         vm.deal(user2, 10 ether);
-        ordersInWait = new OrdersInWait(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59);
+        ordersInWait = new OrdersInWait(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, _cltToken);
         CLT_Token token = new CLT_Token();
         bytes memory data = abi.encodeCall(token.initialize, ("Chainlinker", "CLT", 100_000_000 ether));
         tokenProxy = address(new ERC1967Proxy(address(token), data));

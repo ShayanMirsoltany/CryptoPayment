@@ -9,9 +9,10 @@ contract DeployOrdersInWait is Script {
         vm.startBroadcast();
 
         address _router = 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59;
+        address _cltToken = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
         // address _linkToken = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
         // uint256 _chainSelector = 16015286601757825753;
-        OrdersInWait impl = new OrdersInWait(_router);
+        OrdersInWait impl = new OrdersInWait(_router, _cltToken);
         // bytes memory data = abi.encodeCall(OrdersInWait.initialize, (_router));
         // address proxy = address(new ERC1967Proxy(address(impl), data));
         // console.log("OrdersInWait proxy : ", proxy);

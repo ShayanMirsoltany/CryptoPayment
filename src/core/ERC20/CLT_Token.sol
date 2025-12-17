@@ -18,7 +18,6 @@ contract CLT_Token is
     OwnableUpgradeable,
     AccessControlUpgradeable
 {
-    event cashBackEvent(address indexed receiver, uint256 orderId, uint256 amount, uint256 cashBackAmount, uint256 datetime);
     function initialize(string calldata name_, string calldata symbol_, uint256 cap_) public initializer {
         __ERC20_init(name_, symbol_);
         __ERC20Capped_init(cap_);
@@ -29,13 +28,7 @@ contract CLT_Token is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(Pauser_Role, msg.sender);
         _grantRole(Burner_Role, msg.sender);
-        // _mint(msg.sender, cap_);
-    }
-
-    function CalcCashBack(uint256 orderId, address receiver, uint256 amount) public onlyRole(CashBack_Role) {
-        uint256 cashBackAmount = (amount * 10) / 100;
-        _mint(receiver, cashBackAmount);
-        emit cashBackEvent(receiver, orderId, amount, cashBackAmount, block.timestamp);
+        _grantRole(Minter_Role, msg.sender);
     }
 
     function burn(uint256 amount) public virtual override onlyRole(Burner_Role) {
@@ -54,8 +47,8 @@ contract CLT_Token is
         _unpause();
     }
 
-    function mint(address account, uint256 amount) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _mint(account, amount);
+    function mint(address account, uint256 amount) public onlyRole(Minter_Role) {
+        super._mint(account, amount);
     }
 
     function _mint(address account, uint256 amount) internal override(ERC20Upgradeable, ERC20CappedUpgradeable) {

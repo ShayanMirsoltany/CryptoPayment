@@ -47,7 +47,7 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
         require(CLT_Token(_cltToken).transferFrom(msg.sender, address(this), amount), "CLT transfer failed");
 
         _orders[msg.sender].push(orderId);
-        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, amount, false, block.timestamp, 0);
+        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, amount, false, block.timestamp, 0, true);
 
         try IOrdersInWait(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
             if (!ok) {
@@ -57,8 +57,6 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
             IOrdersInWait(_contractReceiver).addToOrdersInWaiting(order);
         }
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
-
-        CLT_Token(_cltToken).CalcCashBack(orderId, msg.sender, amount);
         result = true;
     }
 
@@ -83,33 +81,3 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }
-
-// import "forge-std/Test.sol";
-// import {CLT_Token} from "../src/CLT_Token.sol";
-// import {PaymentGatewayCLT} from "../src/PaymentGatewayCLT.sol";
-
-// contract PaymentGatewayCLT_Test is Test {
-//     CLT_Token clt;
-//     PaymentGatewayCLT gateway;
-
-//     address USER = address(0x1234);
-
-//     function setUp() public {
-//         // Deploy token
-//         clt = new CLT_Token();
-//         clt.initialize("CLT Token", "CLT", 1_000_000 ether);
-
-//         // Deploy gateway
-//         gateway = new PaymentGatewayCLT();
-//         gateway.initialize(address(clt));
-
-//         // Give USER some CLT
-//         vm.prank(address(this));
-//         clt.transfer(USER, 1000 ether);
-
-//         // Receiver mock
-//         gateway.modifyContractReceiver(address(0x9999));
-//         gateway.modifyDestinationChainSelector(16015286601757825753); // Sepolia
-//     }
-
-// }

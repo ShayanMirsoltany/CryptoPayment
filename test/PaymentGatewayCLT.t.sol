@@ -9,8 +9,6 @@ import "@openzeppelin/utils/Strings.sol";
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 contract PaymentGatewayCLTTest is Test {
-    event cashBackEvent(address indexed receiver, uint256 orderId, uint256 amount, uint256 cashBackAmount, uint256 datetime);
-
     address tokenProxy;
     address payable cltGatewayProxy;
     OrdersInWait ordersInWait;
@@ -27,7 +25,6 @@ contract PaymentGatewayCLTTest is Test {
     function setUp() public {
         vm.deal(user1, 10 ether);
         vm.deal(user2, 10 ether);
-        ordersInWait = new OrdersInWait(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59);
         token = new CLT_Token();
         bytes memory data = abi.encodeCall(token.initialize, ("Chainlinker", "CLT", 100_000_000 ether));
         tokenProxy = address(new ERC1967Proxy(address(token), data));
@@ -35,8 +32,8 @@ contract PaymentGatewayCLTTest is Test {
         PaymentGatewayCLT cltgateway = new PaymentGatewayCLT();
         bytes memory data2 = abi.encodeCall(cltgateway.initialize, (tokenProxy));
         cltGatewayProxy = payable(address(new ERC1967Proxy(address(cltgateway), data2)));
-
-        CLT_Token(tokenProxy).grantRole(CashBack_Role, cltGatewayProxy);
+        ordersInWait = new OrdersInWait(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, tokenProxy);
+        CLT_Token(tokenProxy).grantRole(Minter_Role, address(ordersInWait));
     }
 
     function testCltBalance() public {
@@ -214,7 +211,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.startPrank(user1);
         uint256 cashBackAmount = (amount * 10) / 100;
         vm.expectEmit(true, false, false, true);
-        emit cashBackEvent(user1, orderId, amount, cashBackAmount, block.timestamp);
+        emit CashBackEvent(user1, orderId, amount, cashBackAmount, block.timestamp);
         PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
 
         vm.assertEq(CLT_Token(tokenProxy).balanceOf(user1), 10000 - amount + cashBackAmount);

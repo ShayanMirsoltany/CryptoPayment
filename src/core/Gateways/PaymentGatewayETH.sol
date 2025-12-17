@@ -41,7 +41,7 @@ contract PaymentGatewayETH is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         _balances[msg.sender] += msg.value;
         _orders[msg.sender].push(orderId);
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
-        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0);
+        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0, false);
 
         try IOrdersInWait(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
             if (!ok) {

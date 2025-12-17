@@ -7,4 +7,5 @@ struct OrdersStruct {
     bool success;
     uint256 createdDateTime;
     uint256 modfiedDateTime;
+    bool nativeToken;
 }
