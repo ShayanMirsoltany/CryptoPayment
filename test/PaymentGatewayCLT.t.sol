@@ -144,6 +144,26 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
     }
 
+    function testPayWithPermit_RevertInvalidBalance() public {
+        vm.startPrank(address(this));
+        address receiverContract = address(ordersInWait);
+        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        CLT_Token(tokenProxy).mint(user1, 10);
+
+        uint256 orderId = 123456;
+        uint256 amount = 100 wei;
+        uint256 deadline = block.timestamp + 1 hours;
+        uint256 nonce = CLT_Token(tokenProxy).nonces(user1);
+        bytes32 digest = getPermitDigest(user1, cltGatewayProxy, amount, nonce, deadline);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(user1PK, digest);
+
+        vm.stopPrank();
+        vm.startPrank(user1);
+        vm.expectRevert(Invalid_Balance.selector);
+        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        vm.stopPrank();
+    }
+
     function testPayWithPermit_CheckStatus() public {
         vm.startPrank(address(this));
         address receiverContract = address(ordersInWait);

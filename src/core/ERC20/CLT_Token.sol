@@ -39,6 +39,10 @@ contract CLT_Token is
         super.burnFrom(account, amount);
     }
 
+    function paused() public view override returns (bool) {
+        return super.paused();
+    }
+
     function pause() public onlyRole(Pauser_Role) {
         _pause();
     }

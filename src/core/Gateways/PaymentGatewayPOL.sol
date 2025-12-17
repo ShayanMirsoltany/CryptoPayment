@@ -65,7 +65,6 @@ contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         emit SendMessage_Events(order.orderId, messageId);
         result = true;
     }
-    //  tokenAmounts: new Client.EVMTokenAmountClient.EVMTokenAmount({ token: WETH_SEPOLIA, amount: 0.1 ether }),
     function withDrawBalance() public onlyOwner returns (bool result) {
         (result, ) = payable(owner()).call{ value: address(this).balance }("");
     }

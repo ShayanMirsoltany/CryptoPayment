@@ -58,7 +58,7 @@ contract OrdersInWait is IOrdersInWait, AccessControl, Ownable, CCIPReceiver {
         order.modfiedDateTime = block.timestamp;
         _ordersInfo[order.orderId] = order;
         result = true;
-        if (order.nativeToken) CalcCashBack(order.orderId, order.userId, order.price);
+        if (order.nativeToken && !CLT_Token(_token).paused()) CalcCashBack(order.orderId, order.userId, order.price);
         emit ModifyOrderStatus_Event(order.orderId, order.modfiedDateTime);
     }
 

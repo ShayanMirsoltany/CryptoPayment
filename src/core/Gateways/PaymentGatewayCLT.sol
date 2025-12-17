@@ -42,6 +42,7 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
     function payWithPermit(uint256 orderId, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external returns (bool result) {
         require(_contractReceiver != address(0), Invalid_ReceiverContract());
         require(amount == 100, Invalid_Value());
+        require(CLT_Token(_cltToken).balanceOf(msg.sender) >= amount, Invalid_Balance());
         CLT_Token(_cltToken).permit(msg.sender, address(this), amount, deadline, v, r, s);
 
         require(CLT_Token(_cltToken).transferFrom(msg.sender, address(this), amount), "CLT transfer failed");
