@@ -8,4 +8,6 @@ struct OrdersStruct {
     uint256 createdDateTime;
     uint256 modfiedDateTime;
     bool nativeToken;
+    bool isApproved;
+    uint256 approvedDateTime;
 }

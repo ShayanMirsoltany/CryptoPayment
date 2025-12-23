@@ -48,7 +48,7 @@ contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgrad
         require(CLT_Token(_cltToken).transferFrom(msg.sender, address(this), amount), "CLT transfer failed");
 
         _orders[msg.sender].push(orderId);
-        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, amount, false, block.timestamp, 0, true);
+        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, amount, false, block.timestamp, 0, true, false, 0);
 
         try IOrderApprover(_contractReceiver).modifyOrderStatus(order) returns (bool ok) {
             if (!ok) {
