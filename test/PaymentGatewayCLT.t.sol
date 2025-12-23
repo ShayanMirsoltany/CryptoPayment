@@ -181,7 +181,7 @@ contract PaymentGatewayCLTTest is Test {
 
         vm.startPrank(user1);
         PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
-        // vm.assertEq(orderApprover.getOrderInfo(orderId), OrderState.APPROVED);
+        vm.assertEq(uint256(orderApprover.getOrderInfo(orderId)), uint256(OrderState.WAITING_API));
         vm.stopPrank();
     }
 

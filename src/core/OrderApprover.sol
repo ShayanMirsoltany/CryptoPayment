@@ -54,7 +54,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         _revokeRole(ModifierOrderStatus_Role, contractModifier);
     }
 
-    function _validateSender(Client.Any2EVMMessage memory message) internal view {
+    function _validateSender(Client.Any2EVMMessage memory message) internal pure {
         address amoy = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
         require(abi.decode(message.sender, (address)) == amoy, "INVALID_CCIP_SENDER");
     }

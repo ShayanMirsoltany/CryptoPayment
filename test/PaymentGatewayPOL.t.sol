@@ -120,6 +120,6 @@ contract PaymentGatewayPOLTest is Test {
         vm.stopPrank();
 
         orderApprover.modifyOrderStatus(OrdersStruct(orderId, user, 1, OrderState.WAITING_API, block.timestamp, 0, false, false, 0));
-        vm.assertEq(orderApprover.getOrderInfo(orderId), OrderState.WAITING_API);
+        vm.assertEq(uint256(orderApprover.getOrderInfo(orderId)), uint256(OrderState.WAITING_API));
     }
 }

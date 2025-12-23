@@ -118,7 +118,8 @@ contract PaymentGatewayETHTest is Test {
 
         uint256 orderId = 123456;
         PaymentGatewayETH(ethGatewayProxy).addToPaymentQueue{ value: 1 wei }(orderId);
-        // vm.assertEq(orderApprover.getOrderInfo(orderId), OrderState.APPROVED);
+        vm.assertEq(uint256(orderApprover.getOrderInfo(orderId)), uint256(OrderState.WAITING_API));
+
         vm.stopPrank();
     }
 
