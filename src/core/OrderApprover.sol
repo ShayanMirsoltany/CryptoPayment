@@ -88,6 +88,9 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         order.modfiedDateTime = block.timestamp;
         _ordersInfo[order.orderId] = order;
         result = true;
+        // if (order.nativeToken && !CLT_Token(_token).paused()) {
+        //     CalcCashBack(order.orderId, order.userId, order.price);
+        // }
     }
 
     function getOrderInfo(uint256 orderId) public view override returns (OrderState result) {
