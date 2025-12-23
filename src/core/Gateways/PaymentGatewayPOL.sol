@@ -51,7 +51,7 @@ contract PaymentGatewayPOL is IPaymentGateway, UUPSUpgradeable, OwnableUpgradeab
         _balances[msg.sender] += msg.value;
         _orders[msg.sender] = orderId;
         emit AddToPaymentQueue_Event(msg.sender, orderId, block.timestamp);
-        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, false, block.timestamp, 0, false, false, 0);
+        OrdersStruct memory order = OrdersStruct(orderId, msg.sender, msg.value, OrderState.WAITING_API, block.timestamp, 0, false, false, 0);
 
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(_contractReceiver),

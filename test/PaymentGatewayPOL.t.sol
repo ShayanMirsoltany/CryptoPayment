@@ -119,7 +119,7 @@ contract PaymentGatewayPOLTest is Test {
         polGatewayProxy.addToPaymentQueue{ value: 1 }(orderId);
         vm.stopPrank();
 
-        orderApprover.modifyOrderStatus(OrdersStruct(orderId, user, 1, false, block.timestamp, 0, false, false, 0));
-        vm.assertEq(orderApprover.getOrderInfo(orderId), true);
+        orderApprover.modifyOrderStatus(OrdersStruct(orderId, user, 1, OrderState.WAITING_API, block.timestamp, 0, false, false, 0));
+        vm.assertEq(orderApprover.getOrderInfo(orderId), OrderState.WAITING_API);
     }
 }

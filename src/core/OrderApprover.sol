@@ -54,16 +54,24 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         _revokeRole(ModifierOrderStatus_Role, contractModifier);
     }
 
+    function _validateSender(Client.Any2EVMMessage memory message) internal view {
+        address amoy = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
+        require(abi.decode(message.sender, (address)) == amoy, "INVALID_CCIP_SENDER");
+    }
+
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
+        _validateSender(message); // ⬅️ واجب
+
         (uint256 orderId, uint256 createdDateTime, address userId, uint256 price, bool nativeToken) = abi.decode(
             message.data,
             (uint256, uint256, address, uint256, bool)
         );
-        _ordersInfo[orderId] = OrdersStruct(orderId, userId, price, true, createdDateTime, block.timestamp, nativeToken, false, 0);
+        _ordersInfo[orderId] = OrdersStruct(orderId, userId, price, OrderState.WAITING_API, createdDateTime, block.timestamp, nativeToken, false, 0);
         emit OrderReceived_Event(message.messageId, orderId, userId);
     }
 
     function addToOrdersInWaiting(OrdersStruct memory order) external override onlyRole(ModifierOrderStatus_Role) returns (bool result) {
+        order.state = OrderState.WAITING_API;
         _ordersInfo[order.orderId] = order;
         emit OrderReceivedETH_Event(order.orderId, order.userId);
         return true;
@@ -76,26 +84,37 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     }
 
     function modifyOrderStatus(OrdersStruct memory order) public override onlyRole(ModifierOrderStatus_Role) returns (bool result) {
-        order.success = true;
+        order.state = OrderState.WAITING_API;
         order.modfiedDateTime = block.timestamp;
         _ordersInfo[order.orderId] = order;
         result = true;
-        approveOrder(order.orderId);
     }
 
-    function getOrderInfo(uint256 orderId) public view override returns (bool result) {
-        return _ordersInfo[orderId].success;
+    function getOrderInfo(uint256 orderId) public view override returns (OrderState result) {
+        result = _ordersInfo[orderId].state;
     }
+
+    //#region automation
+
+    function performUpkeep(bytes calldata data) external {
+        uint256 orderId = abi.decode(data, (uint256));
+        require(_ordersInfo[orderId].state == OrderState.WAITING_API);
+
+        _ordersInfo[orderId].state = OrderState.API_REQUESTED;
+        approveOrder(orderId); // ✅ اینجا درست است
+    }
+
+    //#endregion
 
     //#region api
 
     function approveOrder(uint256 orderId) internal returns (bool result) {
-        // Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
-        // req._add("get", string(abi.encodePacked("https://api.nafisexpress.com/panel/site/barcode-statuses?orderId=", orderId)));
-        // req._add("path", "response,isApproved");
-        // req._addInt("times", 1);
-        // bytes32 requestId = _sendChainlinkRequest(req, fee);
-        // _requests[requestId] = orderId;
+        Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
+        req._add("get", string(abi.encodePacked("https://api.nafisexpress.com/panel/site/barcode-statuses?orderId=", orderId)));
+        req._add("path", "response,isApproved");
+        req._addInt("times", 1);
+        bytes32 requestId = _sendChainlinkRequest(req, fee);
+        _requests[requestId] = orderId;
 
         return true;
     }
