@@ -68,7 +68,9 @@ contract OrderApprover is IOrderApprover, AccessControl, Ownable, CCIPReceiver {
         return _ordersInfo[orderId].success;
     }
 
-    function approveOrder(uint256 orderId) internal returns (bool result) {}
+    function approveOrder(uint256 orderId) internal pure returns (bool result) {
+        return true;
+    }
 
     // function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }
