@@ -37,7 +37,9 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ModifierOrderStatus_Role, msg.sender);
     }
+
     mapping(uint256 orderId => OrdersStruct info) private _ordersInfo;
+
     event OrderReceived(uint256 orderID);
 
     mapping(bytes32 requestId => uint256 orderId) private _requests;
