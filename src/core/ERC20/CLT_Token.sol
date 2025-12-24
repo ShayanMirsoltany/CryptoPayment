@@ -51,6 +51,14 @@ contract CLT_Token is
         _unpause();
     }
 
+    function setRole(int8 role, address account) public onlyOwner {
+        if (role == 1) _grantRole(Pauser_Role, account);
+        else if (role == 2) _grantRole(Burner_Role, account);
+        else if (role == 3) _grantRole(Minter_Role, account);
+        else if (role == 4) _grantRole(CashBack_Role, account);
+        else if (role == 5) _grantRole(ModifierOrderStatus_Role, account);
+    }
+
     function mint(address account, uint256 amount) public onlyRole(Minter_Role) {
         super._mint(account, amount);
     }
