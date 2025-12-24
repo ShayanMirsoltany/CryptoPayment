@@ -12,7 +12,7 @@ import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 contract RouterMock {
     uint256 public fee = 1 ether;
     bytes32 public lastMessageId;
-    function getFee(uint64, Client.EVM2AnyMessage calldata) external view returns (uint256) {
+    function getFee(uint64, Client.EVM2AnyMessage calldata message) external view returns (uint256) {
         return fee;
     }
 
@@ -40,7 +40,6 @@ contract PaymentGatewayPOLTest is Test {
     CLT_Token token;
 
     address user;
-
     function setUp() public {
         user = vm.addr(0x111);
         vm.deal(user, 10 ether);
@@ -59,7 +58,6 @@ contract PaymentGatewayPOLTest is Test {
         polGatewayProxy = PaymentGatewayPOL(payable(address(new ERC1967Proxy(address(impl), data2))));
         polGatewayProxy.modifyDestinationChainSelector(1234);
     }
-
     function testModifyContractReceiver() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
@@ -121,7 +119,7 @@ contract PaymentGatewayPOLTest is Test {
         polGatewayProxy.addToPaymentQueue{ value: 1 }(orderId);
         vm.stopPrank();
 
-        orderApprover.modifyOrderStatus(OrdersStruct(orderId, user, 1, false, block.timestamp, 0, false));
-        vm.assertEq(orderApprover.getOrderInfo(orderId), true);
+        orderApprover.modifyOrderStatus(OrdersStruct(orderId, user, 1, OrderState.WAITING_API, block.timestamp, 0, false, false, 0));
+        vm.assertEq(uint256(orderApprover.getOrderInfo(orderId)), uint256(OrderState.WAITING_API));
     }
 }
