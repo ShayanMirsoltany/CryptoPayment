@@ -243,4 +243,43 @@ contract PaymentGatewayCLTTest is Test {
         bytes32 structHash = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline));
         return keccak256(abi.encodePacked("\x19\x01", CLT_Token(tokenProxy).DOMAIN_SEPARATOR(), structHash));
     }
+
+    function testAutomationTriggersApiRequest() public {
+        uint256 orderId = 123;
+
+        // فرض: سفارش قبلاً از CCIP یا Gateway آمده
+        OrdersStruct memory order = OrdersStruct({
+            orderId: orderId,
+            userId: user1,
+            price: 100,
+            state: OrderState.WAITING_API,
+            createdDateTime: block.timestamp,
+            modfiedDateTime: 0,
+            nativeToken: false,
+            isApproved: false,
+            approvedDateTime: 0
+        });
+
+        vm.startPrank(address(this));
+        vm.assertEq(orderApprover.getWatingOrdersCount(), 0);
+        orderApprover.addToOrdersInWaiting(order);
+        vm.assertEq(orderApprover.getWatingOrdersCount(), 1);
+        vm.stopPrank();
+
+        // وقتی Automation اجرا می‌شود
+        orderApprover.performUpkeep(abi.encode(orderId));
+
+        // فقط state باید عوض شود
+        assertEq(uint(orderApprover.getOrderInfo(orderId)), uint(OrderState.API_REQUESTED));
+    }
+
+    function testOracleFulfillmentApprove() public {
+        uint256 orderId = 123;
+        bytes32 fakeRequestId = keccak256("fake-request");
+
+        orderApprover.approveOrder_Fake(fakeRequestId, orderId);
+        orderApprover.fillOrderInfo_Fake(fakeRequestId, true);
+
+        assertEq(uint(orderApprover.getOrderInfo(orderId)), uint(OrderState.APPROVED));
+    }
 }

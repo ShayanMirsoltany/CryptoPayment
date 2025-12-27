@@ -21,8 +21,9 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     bytes32 public jobId_string;
     bytes32 public jobId_bytes;
     bytes32 public jobId_bool;
-
+    uint256[] waitingOrderIds;
     address private _token;
+
     constructor(address router, address token) CCIPReceiver(router) ConfirmedOwner(msg.sender) {
         jobId_uint256 = "ca98366cc7314957b8c012c72f05aeeb";
         jobId_int256 = "fcf4140d696d44b687012232948bdd5d";
@@ -72,9 +73,14 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         emit OrderReceived_Event(message.messageId, orderId, userId);
     }
 
+    function getWatingOrdersCount() public view onlyOwner returns (uint256) {
+        return waitingOrderIds.length;
+    }
+
     function addToOrdersInWaiting(OrdersStruct memory order) external override onlyRole(ModifierOrderStatus_Role) returns (bool result) {
         order.state = OrderState.WAITING_API;
         _ordersInfo[order.orderId] = order;
+        waitingOrderIds.push(order.orderId);
         emit OrderReceivedETH_Event(order.orderId, order.userId);
         return true;
     }
@@ -89,6 +95,8 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         order.state = OrderState.WAITING_API;
         order.modfiedDateTime = block.timestamp;
         _ordersInfo[order.orderId] = order;
+        waitingOrderIds.push(order.orderId);
+
         result = true;
         if (order.nativeToken && !CLT_Token(_token).paused()) {
             CalcCashBack(order.orderId, order.userId, order.price);
@@ -100,6 +108,24 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     }
 
     //#region automation
+
+    function _findWaitingOrder() internal view returns (uint256) {
+        for (uint256 i = 0; i < waitingOrderIds.length; i++) {
+            uint256 orderId = waitingOrderIds[i];
+            if (_ordersInfo[orderId].state == OrderState.WAITING_API) {
+                return orderId;
+            }
+        }
+        return 0;
+    }
+
+    function checkUpkeep(bytes calldata) external view returns (bool upkeepNeeded, bytes memory performData) {
+        uint256 orderId = _findWaitingOrder();
+        if (orderId != 0) {
+            upkeepNeeded = true;
+            performData = abi.encode(orderId);
+        }
+    }
 
     function performUpkeep(bytes calldata data) external {
         uint256 orderId = abi.decode(data, (uint256));
@@ -124,19 +150,36 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         return true;
     }
 
-    function fillOrderInfo(bytes32 _requestId, bool isApproved) public recordChainlinkFulfillment(_requestId) {
-        uint256 orderId = _requests[_requestId];
+    function _handleOracleResult(uint256 orderId, bool isApproved) internal {
         OrdersStruct storage orderInfo = _ordersInfo[orderId];
         orderInfo.isApproved = isApproved;
+
         if (isApproved) {
+            orderInfo.state = OrderState.APPROVED;
             orderInfo.approvedDateTime = block.timestamp;
             emit ModifyOrderStatus_Event(orderInfo.orderId, orderInfo.modfiedDateTime);
 
             if (orderInfo.nativeToken && !CLT_Token(_token).paused()) {
                 CalcCashBack(orderInfo.orderId, orderInfo.userId, orderInfo.price);
             }
+        } else {
+            orderInfo.state = OrderState.WAITING_API;
         }
-        _ordersInfo[orderId] = orderInfo;
+    }
+
+    function fillOrderInfo(bytes32 _requestId, bool isApproved) public recordChainlinkFulfillment(_requestId) {
+        uint256 orderId = _requests[_requestId];
+        _handleOracleResult(orderId, isApproved);
+        delete _requests[_requestId];
+    }
+
+    function approveOrder_Fake(bytes32 _requestId, uint256 orderId) public {
+        _requests[_requestId] = orderId;
+    }
+
+    function fillOrderInfo_Fake(bytes32 _requestId, bool isApproved) public {
+        uint256 orderId = _requests[_requestId];
+        _handleOracleResult(orderId, isApproved);
         delete _requests[_requestId];
     }
 
