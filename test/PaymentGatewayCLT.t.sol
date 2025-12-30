@@ -267,19 +267,10 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
 
         // وقتی Automation اجرا می‌شود
-        orderApprover.performUpkeep(abi.encode(orderId));
+        (bool upkeepNeeded, bytes memory performData) = orderApprover.checkUpkeep(bytes("0"));
+        orderApprover.performUpkeep(performData);
 
         // فقط state باید عوض شود
         assertEq(uint(orderApprover.getOrderInfo(orderId)), uint(OrderState.API_REQUESTED));
-    }
-
-    function testOracleFulfillmentApprove() public {
-        uint256 orderId = 123;
-        bytes32 fakeRequestId = keccak256("fake-request");
-
-        orderApprover.approveOrder_Fake(fakeRequestId, orderId);
-        orderApprover.fillOrderInfo_Fake(fakeRequestId, true);
-
-        assertEq(uint(orderApprover.getOrderInfo(orderId)), uint(OrderState.APPROVED));
     }
 }

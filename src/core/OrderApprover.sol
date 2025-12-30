@@ -132,7 +132,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         require(_ordersInfo[orderId].state == OrderState.WAITING_API);
 
         _ordersInfo[orderId].state = OrderState.API_REQUESTED;
-        approveOrder(orderId); // ✅ اینجا درست است
+        approveOrder(orderId);
     }
 
     //#endregion
@@ -146,7 +146,6 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         req._addInt("times", 1);
         bytes32 requestId = _sendChainlinkRequest(req, fee);
         _requests[requestId] = orderId;
-
         return true;
     }
 
@@ -168,16 +167,6 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     }
 
     function fillOrderInfo(bytes32 _requestId, bool isApproved) public recordChainlinkFulfillment(_requestId) {
-        uint256 orderId = _requests[_requestId];
-        _handleOracleResult(orderId, isApproved);
-        delete _requests[_requestId];
-    }
-
-    function approveOrder_Fake(bytes32 _requestId, uint256 orderId) public {
-        _requests[_requestId] = orderId;
-    }
-
-    function fillOrderInfo_Fake(bytes32 _requestId, bool isApproved) public {
         uint256 orderId = _requests[_requestId];
         _handleOracleResult(orderId, isApproved);
         delete _requests[_requestId];
