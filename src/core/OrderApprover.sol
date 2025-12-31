@@ -12,9 +12,11 @@ import { CCIPReceiver } from "@ccip-contracts/src/v0.8/ccip/applications/CCIPRec
 import { Client } from "@ccip-contracts/src/v0.8/ccip/libraries/Client.sol";
 import "@share/_anyAPIContracts.sol";
 import "@openzeppelin/token/ERC20/IERC20.sol";
+import "@openzeppelin/utils/Strings.sol";
 
 contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, ConfirmedOwner, CCIPReceiver {
     using Chainlink for Chainlink.Request;
+    using Strings for *;
     uint256 private fee;
     bytes32 private jobId_uint256;
     bytes32 private jobId_int256;
@@ -70,6 +72,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
             (uint256, uint256, address, uint256, bool)
         );
         _ordersInfo[orderId] = OrdersStruct(orderId, userId, price, OrderState.WAITING_API, createdDateTime, block.timestamp, nativeToken, false, 0);
+        waitingOrderIds.push(orderId);
         emit OrderReceived_Event(message.messageId, orderId, userId);
     }
 
@@ -139,14 +142,14 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
 
     //#region api
 
-    function approveOrder(uint256 orderId) internal returns (bool result) {
+    function approveOrder(uint256 orderId) internal {
         Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
-        req._add("get", string(abi.encodePacked("https://api.nafisexpress.com/panel/site/barcode-statuses?orderId=", orderId)));
-        req._add("path", "response,isApproved");
-        req._addInt("times", 1);
+        req._add("method", "POST");
+        req._add("url", "https://api.example.com/order/status");
+        req._add("body", string(abi.encodePacked('{"orderId":', orderId.toString(), "}")));
+        req._add("path", "data,isApproved");
         bytes32 requestId = _sendChainlinkRequest(req, fee);
         _requests[requestId] = orderId;
-        return true;
     }
 
     function _handleOracleResult(uint256 orderId, bool isApproved) internal {

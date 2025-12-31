@@ -12,12 +12,21 @@ import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 contract RouterMock {
     uint256 public fee = 1 ether;
     bytes32 public lastMessageId;
+    address payable private orderApprover;
+
     function getFee(uint64, Client.EVM2AnyMessage calldata message) external view returns (uint256) {
         return fee;
     }
 
+    function setOrderApprover(address payable _orderApprover) public {
+        orderApprover = _orderApprover;
+    }
+
     function ccipSend(uint64, Client.EVM2AnyMessage calldata message) external returns (bytes32) {
         lastMessageId = keccak256("mock-message");
+        (uint256 orderId, uint256 createdDateTime, address userId, uint256 price) = abi.decode(message.data, (uint256, uint256, address, uint256));
+        OrdersStruct memory order = OrdersStruct(orderId, userId, price, OrderState.WAITING_API, createdDateTime, block.timestamp, false, false, 0);
+        OrderApprover(orderApprover).addToOrdersInWaiting(order);
         return lastMessageId;
     }
 }
@@ -50,6 +59,8 @@ contract PaymentGatewayPOLTest is Test {
 
         orderApprover = new OrderApprover(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, tokenProxy);
         router = new RouterMock();
+        router.setOrderApprover(payable(address(orderApprover)));
+        orderApprover.setModifierOrderStatusRole(address(router));
         linkToken = new LinkTokenMock();
 
         PaymentGatewayPOL impl = new PaymentGatewayPOL();
@@ -90,6 +101,11 @@ contract PaymentGatewayPOLTest is Test {
     function testAddToPaymentQueue_CCIP_Send_Success() public {
         polGatewayProxy.modifyContractReceiver(address(orderApprover));
         uint256 orderId = 123456;
+
+        vm.startPrank(address(this));
+        vm.assertEq(orderApprover.getWatingOrdersCount(), 0);
+        vm.stopPrank();
+
         vm.startPrank(user);
 
         vm.expectEmit(true, false, false, true);
@@ -99,6 +115,10 @@ contract PaymentGatewayPOLTest is Test {
         emit SendMessage_Events(orderId, keccak256("mock-message"));
 
         bool result = polGatewayProxy.addToPaymentQueue{ value: 1 }(orderId);
+        vm.stopPrank();
+
+        vm.startPrank(address(this));
+        vm.assertEq(orderApprover.getWatingOrdersCount(), 1);
         vm.stopPrank();
 
         assertTrue(result);
