@@ -145,7 +145,8 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     function approveOrder(uint256 orderId) internal {
         Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
         req._add("method", "POST");
-        req._add("url", "https://api.example.com/order/status");
+        req._add("url", "https://api.nafisexpress.dev/panel/approve-order");
+        // // req._add("headers", "Content-Type: application/json, X-REQUEST-SOURCE: chainlink");
         req._add("body", string(abi.encodePacked('{"orderId":', orderId.toString(), "}")));
         req._add("path", "data,isApproved");
         bytes32 requestId = _sendChainlinkRequest(req, fee);
