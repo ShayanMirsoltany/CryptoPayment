@@ -8,6 +8,7 @@ import "@core/OrderApprover.sol";
 
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
+import { Client } from "@ccip-contracts/src/v0.8/ccip/libraries/Client.sol";
 
 contract RouterMock {
     uint256 public fee = 1 ether;
@@ -75,6 +76,15 @@ contract PaymentGatewayPOLTest is Test {
         vm.assertEq(polGatewayProxy.getReceiverContract(), address(0));
         polGatewayProxy.modifyContractReceiver(receiverContract);
         vm.assertEq(polGatewayProxy.getReceiverContract(), receiverContract);
+        vm.stopPrank();
+    }
+
+    function testValidateSender() public {
+        vm.startPrank(address(this));
+        address sender = vm.addr(0x555);
+        vm.assertEq(orderApprover.checkValidSender(sender), false);
+        orderApprover.modifyValidSender(sender, true);
+        vm.assertEq(orderApprover.checkValidSender(sender), true);
         vm.stopPrank();
     }
 

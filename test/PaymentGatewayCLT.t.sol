@@ -8,7 +8,8 @@ import "@core/OrderApprover.sol";
 import "@openzeppelin/utils/Strings.sol";
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-contract PaymentGatewayCLKTest is Test {
+
+contract PaymentGatewayCLTTest is Test {
     address tokenProxy;
     address payable cltGatewayProxy;
     OrderApprover orderApprover;
