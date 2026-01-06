@@ -25,7 +25,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     bytes32 public jobId_bool;
     uint256[] waitingOrderIds;
     address private _token;
-
+    mapping(address => bool) private _validSenders;
     constructor(address router, address token) CCIPReceiver(router) ConfirmedOwner(msg.sender) {
         jobId_uint256 = "ca98366cc7314957b8c012c72f05aeeb";
         jobId_int256 = "fcf4140d696d44b687012232948bdd5d";
@@ -59,13 +59,22 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         _revokeRole(ModifierOrderStatus_Role, contractModifier);
     }
 
+    function modifyValidSender(address _senderAddress, bool _status) public onlyOwner {
+        _validSenders[_senderAddress] = _status;
+    }
+
+    function checkValidSender(address _senderAddress) public onlyOwner returns (bool) {
+        return _validSenders[_senderAddress];
+    }
+
     function _validateSender(Client.Any2EVMMessage memory message) internal pure {
-        address amoy = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
-        require(abi.decode(message.sender, (address)) == amoy, "INVALID_CCIP_SENDER");
+        // address amoy = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
+        bool isValidSender = _validSenders[abi.decode(message.sender, (address))];
+        require(isValidSender, "INVALID_CCIP_SENDER");
     }
 
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
-        _validateSender(message); // ⬅️ واجب
+        _validateSender(message);
 
         (uint256 orderId, uint256 createdDateTime, address userId, uint256 price, bool nativeToken) = abi.decode(
             message.data,
@@ -141,6 +150,17 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     //#endregion
 
     //#region api
+
+    function approveOrderTest(uint256 orderId) public onlyOwner {
+        Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
+        req._add("method", "POST");
+        req._add("url", "https://api.nafisexpress.dev/panel/approve-order");
+        // // req._add("headers", "Content-Type: application/json, X-REQUEST-SOURCE: chainlink");
+        req._add("body", string(abi.encodePacked('{"orderId":', orderId.toString(), "}")));
+        req._add("path", "data,isApproved");
+        bytes32 requestId = _sendChainlinkRequest(req, fee);
+        _requests[requestId] = orderId;
+    }
 
     function approveOrder(uint256 orderId) internal {
         Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
