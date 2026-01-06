@@ -63,11 +63,11 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         _validSenders[_senderAddress] = _status;
     }
 
-    function checkValidSender(address _senderAddress) public onlyOwner returns (bool) {
+    function checkValidSender(address _senderAddress) public view onlyOwner returns (bool) {
         return _validSenders[_senderAddress];
     }
 
-    function _validateSender(Client.Any2EVMMessage memory message) internal pure {
+    function _validateSender(Client.Any2EVMMessage memory message) internal view {
         // address amoy = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
         bool isValidSender = _validSenders[abi.decode(message.sender, (address))];
         require(isValidSender, "INVALID_CCIP_SENDER");
