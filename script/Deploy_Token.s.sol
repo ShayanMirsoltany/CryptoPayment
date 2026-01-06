@@ -25,7 +25,7 @@ contract DeployTokenV1 is Script {
 //     }
 // }
 
-// contract token : 0x0d849283582499E5FeD9A3ee093e1Ce318D5c63b
+// contract token : 0x5761561e23cd79FC949341B73Fe9E75a7951fFc2
 // proxy address : 0xB3e71B5B930607e3E10c5c8A591bCC6D59b93CaF
 
 // forge script script/Deploy_Token.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
