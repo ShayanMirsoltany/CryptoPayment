@@ -2,16 +2,16 @@
 pragma solidity ^0.8.30;
 import "forge-std/Script.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-import "@core/Gateways/PaymentGatewayCLT.sol";
+import "@core/Gateways/PaymentGatewayCLK.sol";
 
-contract DeployPaymentGatewayCLT is Script {
+contract DeployPaymentGatewayCLK is Script {
     function run() public {
         vm.startBroadcast();
         address _cltToken = 0x9C32fCB86BF0f4a1A8921a9Fe46de3198bb884B2;
-        PaymentGatewayCLT impl = new PaymentGatewayCLT();
-        bytes memory data = abi.encodeCall(PaymentGatewayCLT.initialize, (_cltToken));
+        PaymentGatewayCLK impl = new PaymentGatewayCLK();
+        bytes memory data = abi.encodeCall(PaymentGatewayCLK.initialize, (_cltToken));
         address proxy = address(new ERC1967Proxy(address(impl), data));
-        console.log("PaymentGatewayCLT proxy : ", proxy);
+        console.log("PaymentGatewayCLK proxy : ", proxy);
         vm.stopBroadcast();
     }
 }

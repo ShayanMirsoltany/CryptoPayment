@@ -3,12 +3,12 @@ pragma solidity ^0.8.20;
 import "@utils/Roles.sol";
 import "@utils/Errors.sol";
 import "@erc20/CLT_Token.sol";
-import "@core/Gateways/PaymentGatewayCLT.sol";
+import "@core/Gateways/PaymentGatewayCLK.sol";
 import "@core/OrderApprover.sol";
 import "@openzeppelin/utils/Strings.sol";
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-contract PaymentGatewayCLTTest is Test {
+contract PaymentGatewayCLKTest is Test {
     address tokenProxy;
     address payable cltGatewayProxy;
     OrderApprover orderApprover;
@@ -29,7 +29,7 @@ contract PaymentGatewayCLTTest is Test {
         bytes memory data = abi.encodeCall(token.initialize, ("Chainlinker", "CLT", 100_000_000 ether));
         tokenProxy = address(new ERC1967Proxy(address(token), data));
 
-        PaymentGatewayCLT cltgateway = new PaymentGatewayCLT();
+        PaymentGatewayCLK cltgateway = new PaymentGatewayCLK();
         bytes memory data2 = abi.encodeCall(cltgateway.initialize, (tokenProxy));
         cltGatewayProxy = payable(address(new ERC1967Proxy(address(cltgateway), data2)));
         orderApprover = new OrderApprover(0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59, tokenProxy);
@@ -49,9 +49,9 @@ contract PaymentGatewayCLTTest is Test {
     function testModifyContractReceiver() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        vm.assertEq(PaymentGatewayCLT(cltGatewayProxy).getReceiverContract(), address(0));
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
-        vm.assertEq(PaymentGatewayCLT(cltGatewayProxy).getReceiverContract(), receiverContract);
+        vm.assertEq(PaymentGatewayCLK(cltGatewayProxy).getReceiverContract(), address(0));
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        vm.assertEq(PaymentGatewayCLK(cltGatewayProxy).getReceiverContract(), receiverContract);
         vm.stopPrank();
     }
 
@@ -59,27 +59,27 @@ contract PaymentGatewayCLTTest is Test {
         vm.startPrank(user1);
         uint256 orderID = 123456;
         vm.expectRevert(Invalid_ReceiverContract.selector);
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderID, 1, 1, 1, keccak256("test"), keccak256("test"));
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderID, 1, 1, 1, keccak256("test"), keccak256("test"));
         vm.stopPrank();
     }
 
     function testAddToPaymentQueueInvalidValue() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         vm.stopPrank();
 
         vm.startPrank(user1);
         uint256 orderID = 123456;
         vm.expectRevert(Invalid_Value.selector);
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderID, 1, 1, 1, bytes32("test"), bytes32("test"));
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderID, 1, 1, 1, bytes32("test"), bytes32("test"));
         vm.stopPrank();
     }
 
     function testPayWithPermitCheckBalance() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         orderApprover.setModifierOrderStatusRole(cltGatewayProxy);
         CLT_Token(tokenProxy).mint(user1, 10000);
 
@@ -93,7 +93,7 @@ contract PaymentGatewayCLTTest is Test {
 
         vm.stopPrank();
         vm.startPrank(user1);
-        bool ok = PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        bool ok = PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
         assertTrue(ok);
 
@@ -105,7 +105,7 @@ contract PaymentGatewayCLTTest is Test {
     function testPayWithPermit_AddToPaymentQueue_Event() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         orderApprover.setModifierOrderStatusRole(cltGatewayProxy);
         CLT_Token(tokenProxy).mint(user1, 10000);
 
@@ -120,14 +120,14 @@ contract PaymentGatewayCLTTest is Test {
         vm.startPrank(user1);
         vm.expectEmit(true, false, false, true);
         emit AddToPaymentQueue_Event(user1, orderId, block.timestamp);
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
     }
 
     function testPayWithPermit_ReceiverCheckRole() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         CLT_Token(tokenProxy).mint(user1, 10000);
 
         uint256 orderId = 123456;
@@ -140,14 +140,14 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
         vm.startPrank(user1);
         vm.expectRevert();
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
     }
 
     function testPayWithPermit_RevertInvalidBalance() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         CLT_Token(tokenProxy).mint(user1, 10);
 
         uint256 orderId = 123456;
@@ -160,14 +160,14 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
         vm.startPrank(user1);
         vm.expectRevert(Invalid_Balance.selector);
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
     }
 
     function testPayWithPermit_CheckStatus() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         orderApprover.setModifierOrderStatusRole(cltGatewayProxy);
         CLT_Token(tokenProxy).mint(user1, 10000);
 
@@ -180,7 +180,7 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
 
         vm.startPrank(user1);
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.assertEq(uint256(orderApprover.getOrderInfo(orderId)), uint256(OrderState.WAITING_API));
         vm.stopPrank();
     }
@@ -188,7 +188,7 @@ contract PaymentGatewayCLTTest is Test {
     function testWithDrawBalance() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         orderApprover.setModifierOrderStatusRole(cltGatewayProxy);
         CLT_Token(tokenProxy).mint(user1, 10000);
 
@@ -201,13 +201,13 @@ contract PaymentGatewayCLTTest is Test {
         vm.stopPrank();
 
         vm.startPrank(user1);
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
         vm.stopPrank();
 
         vm.startPrank(address(this));
-        vm.assertEq(PaymentGatewayCLT(cltGatewayProxy).owner(), address(this));
+        vm.assertEq(PaymentGatewayCLK(cltGatewayProxy).owner(), address(this));
         vm.assertEq(CLT_Token(tokenProxy).balanceOf(cltGatewayProxy), 100);
-        bool result = PaymentGatewayCLT(cltGatewayProxy).withDrawBalance();
+        bool result = PaymentGatewayCLK(cltGatewayProxy).withDrawBalance();
         vm.assertTrue(result);
         vm.assertEq(CLT_Token(tokenProxy).balanceOf(address(this)), 100);
         vm.stopPrank();
@@ -216,7 +216,7 @@ contract PaymentGatewayCLTTest is Test {
     function testCashBack() public {
         vm.startPrank(address(this));
         address receiverContract = address(orderApprover);
-        PaymentGatewayCLT(cltGatewayProxy).modifyContractReceiver(receiverContract);
+        PaymentGatewayCLK(cltGatewayProxy).modifyContractReceiver(receiverContract);
         orderApprover.setModifierOrderStatusRole(cltGatewayProxy);
         CLT_Token(tokenProxy).mint(user1, 10000);
 
@@ -232,7 +232,7 @@ contract PaymentGatewayCLTTest is Test {
         uint256 cashBackAmount = (amount * 10) / 100;
         vm.expectEmit(true, false, false, true);
         emit CashBackEvent(user1, orderId, amount, cashBackAmount, block.timestamp);
-        PaymentGatewayCLT(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
+        PaymentGatewayCLK(cltGatewayProxy).payWithPermit(orderId, amount, deadline, v, r, s);
 
         vm.assertEq(CLT_Token(tokenProxy).balanceOf(user1), 10000 - amount + cashBackAmount);
         vm.stopPrank();
@@ -268,7 +268,7 @@ contract PaymentGatewayCLTTest is Test {
 
         // وقتی Automation اجرا می‌شود
         (bool upkeepNeeded, bytes memory performData) = orderApprover.checkUpkeep(bytes("0"));
-        orderApprover.performUpkeep(performData);
+        if (upkeepNeeded) orderApprover.performUpkeep(performData);
 
         // فقط state باید عوض شود
         assertEq(uint(orderApprover.getOrderInfo(orderId)), uint(OrderState.API_REQUESTED));
