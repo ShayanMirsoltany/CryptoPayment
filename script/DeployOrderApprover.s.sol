@@ -14,3 +14,9 @@ contract DeployOrderApprover is Script {
         vm.stopBroadcast();
     }
 }
+// contract token : 0xB38784480e506BDBF2155717b11F8d98E6571ffc
+
+// forge script script/DeployOrderApprover.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
+//Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0xB38784480e506BDBF2155717b11F8d98E6571ffc  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast send 0xB38784480e506BDBF2155717b11F8d98E6571ffc "createOrder(uint256)" 123321 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
+//cast call 0xB38784480e506BDBF2155717b11F8d98E6571ffc "getOrderInfo(uint256)" 123321 --rpc-url $env:RPC_SEPOLIA

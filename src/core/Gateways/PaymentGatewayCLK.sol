@@ -10,7 +10,7 @@ import "@interfaces/IPaymentGateway.sol";
 import "@interfaces/IOrderApprover.sol";
 import "@erc20/CLT_Token.sol";
 
-contract PaymentGatewayCLT is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
+contract PaymentGatewayCLK is IPaymentCLTGateway, UUPSUpgradeable, OwnableUpgradeable, AccessControlUpgradeable {
     mapping(address userWalletId => uint256 amont) private _balances;
     mapping(address userId => uint256[] orderId) private _orders;
     mapping(uint256 orderId => bytes32 messageId) private _ordersMessage;
