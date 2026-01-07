@@ -44,6 +44,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     mapping(uint256 orderId => OrdersStruct info) private _ordersInfo;
 
     event OrderReceived(uint256 orderID);
+    event ApproveOrderTest(uint256 orderID);
 
     mapping(bytes32 requestId => uint256 orderId) private _requests;
 
@@ -110,9 +111,9 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         waitingOrderIds.push(order.orderId);
 
         result = true;
-        if (order.nativeToken && !CLT_Token(_token).paused()) {
-            CalcCashBack(order.orderId, order.userId, order.price);
-        }
+        // if (order.nativeToken && !CLT_Token(_token).paused()) {
+        //     CalcCashBack(order.orderId, order.userId, order.price);
+        // }
     }
 
     function getOrderInfo(uint256 orderId) public view override returns (OrderState result) {
@@ -151,24 +152,19 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
 
     //#region api
 
-    function approveOrderTest(uint256 orderId) public onlyOwner {
-        Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
-        req._add("method", "POST");
-        req._add("url", "https://api.nafisexpress.dev/panel/approve-order");
-        // // req._add("headers", "Content-Type: application/json, X-REQUEST-SOURCE: chainlink");
-        req._add("body", string(abi.encodePacked('{"orderId":', orderId.toString(), "}")));
-        req._add("path", "data,isApproved");
-        bytes32 requestId = _sendChainlinkRequest(req, fee);
-        _requests[requestId] = orderId;
+    function createOrder(uint256 orderId) public onlyOwner {
+        _ordersInfo[orderId] = OrdersStruct(orderId, msg.sender, 100000, OrderState.WAITING_API, block.timestamp, block.timestamp, false, false, 0);
+        waitingOrderIds.push(orderId);
     }
 
     function approveOrder(uint256 orderId) internal {
+        emit ApproveOrderTest(orderId);
+
         Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
-        req._add("method", "POST");
-        req._add("url", "https://api.nafisexpress.dev/panel/approve-order");
+        req._add("GET", string(abi.encodePacked("https://api.nafisexpress.dev/panel/approve-order?orderId=", orderId.toString())));
         // // req._add("headers", "Content-Type: application/json, X-REQUEST-SOURCE: chainlink");
-        req._add("body", string(abi.encodePacked('{"orderId":', orderId.toString(), "}")));
-        req._add("path", "data,isApproved");
+        // req._add("body", string(abi.encodePacked('{"orderId":', orderId.toString(), "}")));
+        req._add("path", "isApproved");
         bytes32 requestId = _sendChainlinkRequest(req, fee);
         _requests[requestId] = orderId;
     }
