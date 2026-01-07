@@ -148,6 +148,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         req._add("url", "https://api.example.com/order/status");
         req._add("body", string(abi.encodePacked('{"orderId":', orderId.toString(), "}")));
         req._add("path", "data,isApproved");
+        // req._add("path", "isApproved");
         bytes32 requestId = _sendChainlinkRequest(req, fee);
         _requests[requestId] = orderId;
     }
