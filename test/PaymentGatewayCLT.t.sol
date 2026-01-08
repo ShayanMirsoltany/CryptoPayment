@@ -8,8 +8,8 @@ import "@core/OrderApprover.sol";
 import "@openzeppelin/utils/Strings.sol";
 import { Test, console } from "forge-std/Test.sol";
 import "@openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-
 contract PaymentGatewayCLTTest is Test {
+    using Strings for *;
     address tokenProxy;
     address payable cltGatewayProxy;
     OrderApprover orderApprover;
@@ -273,5 +273,14 @@ contract PaymentGatewayCLTTest is Test {
 
         // فقط state باید عوض شود
         assertEq(uint(orderApprover.getOrderInfo(orderId)), uint(OrderState.API_REQUESTED));
+    }
+
+    function testString() public view {
+        uint256 orderId = 1234;
+        address customerId = vm.addr(0x123);
+        console.log(
+            "uri : ",
+            string(abi.encodePacked("https://api.nafisexpress.dev/panel/approve-order?orderId=", orderId.toString(), "&&userId=", customerId.toHexString()))
+        );
     }
 }

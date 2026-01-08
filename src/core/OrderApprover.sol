@@ -157,7 +157,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         emit ApproveOrderTest(orderId);
         address customerId = _ordersInfo[orderId].userId;
         Chainlink.Request memory req = _buildChainlinkRequest(jobId_bool, address(this), this.fillOrderInfo.selector);
-        req._add("get", string(abi.encodePacked("https://api.nafisexpress.dev/panel/approve-order?orderId=", orderId.toString(), "userId=", customerId)));
+        req._add("get", string(abi.encodePacked("https://api.nafisexpress.dev/panel/approve-order?orderId=", orderId.toString(), "&&userId=", customerId.toHexString())));
         req._add("path", "isApproved");
         bytes32 requestId = _sendChainlinkRequest(req, fee);
         _requests[requestId] = orderId;
