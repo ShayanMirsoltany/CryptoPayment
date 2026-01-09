@@ -74,6 +74,16 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         require(isValidSender, "INVALID_CCIP_SENDER");
     }
 
+    function getWatingOrdersCount() public view onlyOwner returns (uint256) {
+        return waitingOrderIds.length;
+    }
+
+    function createNewOrder(OrdersStruct memory order) internal {
+        order.state = OrderState.WAITING_API;
+        _ordersInfo[order.orderId] = order;
+        waitingOrderIds.push(order.orderId);
+    }
+
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
         _validateSender(message);
 
@@ -81,35 +91,27 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
             message.data,
             (uint256, uint256, address, uint256, bool)
         );
-        _ordersInfo[orderId] = OrdersStruct(orderId, userId, price, OrderState.WAITING_API, createdDateTime, block.timestamp, nativeToken, false, 0);
-        waitingOrderIds.push(orderId);
+        OrdersStruct storage order = OrdersStruct(orderId, userId, price, OrderState.WAITING_API, createdDateTime, block.timestamp, nativeToken, false, 0);
+        createNewOrder(order);
         emit OrderReceived_Event(message.messageId, orderId, userId);
     }
 
-    function getWatingOrdersCount() public view onlyOwner returns (uint256) {
-        return waitingOrderIds.length;
-    }
-
     function addToOrdersInWaiting(OrdersStruct memory order) external override onlyRole(ModifierOrderStatus_Role) returns (bool result) {
-        order.state = OrderState.WAITING_API;
-        _ordersInfo[order.orderId] = order;
-        waitingOrderIds.push(order.orderId);
+        createNewOrder(order);
         emit OrderReceivedETH_Event(order.orderId, order.userId);
         return true;
+    }
+
+    function modifyOrderStatus(OrdersStruct memory order) public override onlyRole(ModifierOrderStatus_Role) returns (bool result) {
+        order.modfiedDateTime = block.timestamp;
+        createNewOrder(order);
+        result = true;
     }
 
     function CalcCashBack(uint256 orderId, address receiver, uint256 amount) internal {
         uint256 cashBackAmount = (amount * 10) / 100;
         CLT_Token(_token).mint(receiver, cashBackAmount);
         emit CashBackEvent(receiver, orderId, amount, cashBackAmount, block.timestamp);
-    }
-
-    function modifyOrderStatus(OrdersStruct memory order) public override onlyRole(ModifierOrderStatus_Role) returns (bool result) {
-        order.state = OrderState.WAITING_API;
-        order.modfiedDateTime = block.timestamp;
-        _ordersInfo[order.orderId] = order;
-        waitingOrderIds.push(order.orderId);
-        result = true;
     }
 
     function getOrderInfo(uint256 orderId) public view override returns (OrderState result) {
@@ -148,7 +150,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
 
     //#region api
 
-    function createOrder(uint256 orderId) public onlyOwner {
+    function createOrderForTest(uint256 orderId) public onlyOwner {
         _ordersInfo[orderId] = OrdersStruct(orderId, msg.sender, 100000, OrderState.WAITING_API, block.timestamp, block.timestamp, false, false, 0);
         waitingOrderIds.push(orderId);
     }
