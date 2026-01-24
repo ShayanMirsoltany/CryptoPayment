@@ -195,6 +195,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
 
     function CalcCashBack(uint256 orderId, address receiver, uint256 amount) internal {
         uint256 cashBackAmount = (amount * _cashbackPercent) / 100;
+
         CLT_Token(_token).mint(receiver, cashBackAmount);
         emit CashBackEvent(receiver, orderId, amount, cashBackAmount, block.timestamp);
     }
