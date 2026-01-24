@@ -17,6 +17,7 @@ import "@openzeppelin/utils/Strings.sol";
 contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, ConfirmedOwner, CCIPReceiver {
     using Chainlink for Chainlink.Request;
     using Strings for *;
+    uint8 private _cashbackPercent;
     uint256 private fee;
     bytes32 private jobId_uint256;
     bytes32 private jobId_int256;
@@ -42,11 +43,21 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
     }
 
     mapping(uint256 orderId => OrdersStruct info) private _ordersInfo;
-
+    event cashBackEvent(address indexed userId, uint8 percent, uint256 updateDateTime);
     event OrderReceived(uint256 orderID);
     event ApproveOrderTest(uint256 orderID);
 
     mapping(bytes32 requestId => uint256 orderId) private _requests;
+
+    function setCashbackPercent(uint8 _percent) public onlyOwner {
+        require(_percent > 0 && _percent < 100 && _cashbackPercent != _percent, "Invalid_Cashback_Percent");
+        _cashbackPercent = _percent;
+        emit cashBackEvent(msg.sender, _percent, block.timestamp);
+    }
+
+    function getCashbackPercent() public view onlyOwner returns (uint8 _percent) {
+        _percent = _cashbackPercent;
+    }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl, CCIPReceiver) returns (bool) {
         return super.supportsInterface(interfaceId);
@@ -91,7 +102,7 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
             message.data,
             (uint256, uint256, address, uint256, bool)
         );
-        OrdersStruct storage order = OrdersStruct(orderId, userId, price, OrderState.WAITING_API, createdDateTime, block.timestamp, nativeToken, false, 0);
+        OrdersStruct memory order = OrdersStruct(orderId, userId, price, OrderState.WAITING_API, createdDateTime, block.timestamp, nativeToken, false, 0);
         createNewOrder(order);
         emit OrderReceived_Event(message.messageId, orderId, userId);
     }
@@ -106,12 +117,6 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         order.modfiedDateTime = block.timestamp;
         createNewOrder(order);
         result = true;
-    }
-
-    function CalcCashBack(uint256 orderId, address receiver, uint256 amount) internal {
-        uint256 cashBackAmount = (amount * 10) / 100;
-        CLT_Token(_token).mint(receiver, cashBackAmount);
-        emit CashBackEvent(receiver, orderId, amount, cashBackAmount, block.timestamp);
     }
 
     function getOrderInfo(uint256 orderId) public view override returns (OrderState result) {
@@ -165,6 +170,12 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         _requests[requestId] = orderId;
     }
 
+    function fillOrderInfo(bytes32 _requestId, bool isApproved) public recordChainlinkFulfillment(_requestId) {
+        uint256 orderId = _requests[_requestId];
+        _handleOracleResult(orderId, isApproved);
+        delete _requests[_requestId];
+    }
+
     function _handleOracleResult(uint256 orderId, bool isApproved) internal {
         OrdersStruct storage orderInfo = _ordersInfo[orderId];
         orderInfo.isApproved = isApproved;
@@ -182,10 +193,10 @@ contract OrderApprover is IOrderApprover, AccessControl, ChainlinkClient, Confir
         }
     }
 
-    function fillOrderInfo(bytes32 _requestId, bool isApproved) public recordChainlinkFulfillment(_requestId) {
-        uint256 orderId = _requests[_requestId];
-        _handleOracleResult(orderId, isApproved);
-        delete _requests[_requestId];
+    function CalcCashBack(uint256 orderId, address receiver, uint256 amount) internal {
+        uint256 cashBackAmount = (amount * _cashbackPercent) / 100;
+        CLT_Token(_token).mint(receiver, cashBackAmount);
+        emit CashBackEvent(receiver, orderId, amount, cashBackAmount, block.timestamp);
     }
 
     function withDrawToken(address _receiver, address customToken) public onlyOwner {
