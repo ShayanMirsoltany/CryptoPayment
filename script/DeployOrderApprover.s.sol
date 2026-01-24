@@ -14,18 +14,9 @@ contract DeployOrderApprover is Script {
         vm.stopBroadcast();
     }
 }
-<<<<<<< HEAD
-// contract token : 0x961f6F2AaEED98744CFe1EC0e216278E47543750
-
-//forge script script/DeployOrderApprover.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
-//Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0x961f6F2AaEED98744CFe1EC0e216278E47543750  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast send 0x961f6F2AaEED98744CFe1EC0e216278E47543750 "createOrder(uint256)" 909091 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
-//cast call 0x961f6F2AaEED98744CFe1EC0e216278E47543750 "getOrderInfo(uint256)" 909091 --rpc-url $env:RPC_SEPOLIA
-=======
 // contract token : 0xCAc8534D5438f8C7FC3FA8827d61aa15E0223C11
 
 //forge script script/DeployOrderApprover.s.sol --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY --broadcast --verify
 //Link Sepolia // cast send 0x779877A7B0D9E8603169DdbD7836e478b4624789 "transfer(address,uint256)" 0xCAc8534D5438f8C7FC3FA8827d61aa15E0223C11  2000000000000000000 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
 //cast send 0xCAc8534D5438f8C7FC3FA8827d61aa15E0223C11 "createOrder(uint256)" 551100 --rpc-url $env:RPC_SEPOLIA --private-key $env:PRIVATE_KEY
 //cast call 0xCAc8534D5438f8C7FC3FA8827d61aa15E0223C11 "getOrderInfo(uint256)" 551100 --rpc-url $env:RPC_SEPOLIA
->>>>>>> df5db0f (cashback percent)
