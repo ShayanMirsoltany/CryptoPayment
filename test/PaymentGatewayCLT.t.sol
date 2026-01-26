@@ -275,7 +275,7 @@ contract PaymentGatewayCLTTest is Test {
         assertEq(uint(orderApprover.getOrderInfo(orderId)), uint(OrderState.API_REQUESTED));
     }
 
-    function testString() public view {
+    function testString() public pure {
         uint256 orderId = 1234;
         address customerId = vm.addr(0x123);
         console.log(
